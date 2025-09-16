@@ -13,10 +13,12 @@ ReportDemo is a simple ASP.NET MVC project that demonstrates a secure login syst
 ## Screenshots
 
 ### Secure Login
-![Secure Login](assets/login.png)
+![Secure Login](assets/login.png)<img width="505" height="772" alt="image" src="https://github.com/user-attachments/assets/875eec12-fe12-4fbf-9410-753ad556166a" />
+
 
 ### Students List & Actions
-![Students List](assets/students-list.png)
+![Students List](assets/students-list.png)<img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/8379dfa3-f963-4781-8dc2-33d9fae4ba0c" />
+
 
 ## How to Run (Manual Steps)
 
