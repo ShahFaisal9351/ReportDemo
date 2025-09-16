@@ -77,3 +77,6 @@ This project is for demo purposes and showcases a basic student management syste
 - `assets/students-list.png` — Students list screenshot
 
 > _Please make sure the image files are placed in the `assets/` folder as referenced above for proper rendering in GitHub._
+**Password**
+Shahfaisal9351@gmail.com
+Aa@1234
