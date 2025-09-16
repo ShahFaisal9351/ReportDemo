@@ -1,0 +1,132 @@
+﻿@model OfflineAuthDemo.Models.RegisterViewModel
+@{
+    ViewData["Title"] = "Register";
+}
+
+<div class="register-container">
+    <div class="register-card">
+        <h2 class="register-title">✨ Create Account</h2>
+        <p class="register-subtitle">Join us and unlock the future experience</p>
+
+        <form asp-action="Register" method="post" class="register-form">
+            <div asp-validation-summary="All" class="text-danger"></div>
+
+            <div class="form-group">
+                <label asp-for="Email" class="form-label"></label>
+                <input asp-for="Email" class="form-control futuristic-input" placeholder="Enter your email" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Password" class="form-label"></label>
+                <input asp-for="Password" class="form-control futuristic-input" placeholder="Enter your password" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="ConfirmPassword" class="form-label"></label>
+                <input asp-for="ConfirmPassword" class="form-control futuristic-input" placeholder="Confirm your password" />
+                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn futuristic-btn">🚀 Register</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+<style>
+    body {
+        background: linear-gradient(135deg, #141e30, #243b55);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .register-container {
+        z-index: 10;
+    }
+
+    .register-card {
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(15px);
+        border-radius: 20px;
+        padding: 40px;
+        width: 400px;
+        color: #fff;
+        box-shadow: 0 0 30px rgba(0, 255, 200, 0.4);
+        animation: fadeIn 1s ease-in-out;
+    }
+
+    .register-title {
+        text-align: center;
+        font-size: 28px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: #00ffd5;
+        text-shadow: 0 0 12px #00ffd5;
+    }
+
+    .register-subtitle {
+        text-align: center;
+        font-size: 14px;
+        margin-bottom: 25px;
+        opacity: 0.85;
+    }
+
+    .futuristic-input {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(0, 255, 200, 0.5);
+        color: #fff;
+        padding: 12px;
+        border-radius: 10px;
+        width: 100%;
+        transition: 0.3s ease;
+    }
+
+        .futuristic-input:focus {
+            outline: none;
+            border-color: #00ffd5;
+            box-shadow: 0 0 15px #00ffd5;
+        }
+
+    .futuristic-btn {
+        width: 100%;
+        background: linear-gradient(90deg, #00ffd5, #00faff);
+        border: none;
+        padding: 12px;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: bold;
+        color: #000;
+        margin-top: 15px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+        .futuristic-btn:hover {
+            background: linear-gradient(90deg, #00faff, #00ffd5);
+            box-shadow: 0 0 20px #00ffd5;
+            transform: translateY(-3px);
+        }
+
+    keyframes fadeIn {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+</style>
