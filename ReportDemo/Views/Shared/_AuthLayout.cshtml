@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>@ViewData["Title"] - ReportDemo</title>
+	<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+	<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+	<style>
+		.auth-bg {
+			min-height: 100vh;
+			background: radial-gradient(1200px 600px at 10% 10%, rgba(13,110,253,0.15), transparent),
+				radial-gradient(1000px 500px at 90% 90%, rgba(32,201,151,0.15), transparent),
+				linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+			color: #e9eef7;
+		}
+		.auth-card {
+			backdrop-filter: blur(12px);
+			background: rgba(255,255,255,0.06);
+			border: 1px solid rgba(255,255,255,0.15);
+			border-radius: 16px;
+			box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+		}
+		.brand-title {
+			font-weight: 700;
+			letter-spacing: .5px;
+		}
+		.form-control.auth-input {
+			background: rgba(255,255,255,0.12);
+			border: 1px solid rgba(255,255,255,0.25);
+			color: #fff;
+		}
+		.form-control.auth-input:focus {
+			border-color: rgba(13,110,253,.75);
+			box-shadow: 0 0 0 .25rem rgba(13,110,253,.25);
+		}
+		.auth-btn {
+			background: linear-gradient(90deg, #0d6efd, #31d2f2);
+			border: none;
+		}
+		.auth-btn:hover {
+			filter: brightness(1.05);
+		}
+	</style>
+</head>
+<body class="auth-bg d-flex align-items-center">
+	<div class="container py-5">
+		<div class="row justify-content-center">
+			<div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5">
+				<div class="auth-card p-4 p-md-5">
+					<div class="d-flex align-items-center justify-content-between mb-4">
+						<h4 class="brand-title mb-0">ReportDemo</h4>
+						<span class="text-white-50">@ViewData["Title"]</span>
+					</div>
+					@RenderBody()
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+	@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
+
+
+

@@ -1,33 +1,198 @@
 ﻿@model ReportDemo.Models.Student
 
-<div class="container mt-4">
-    <div class="card shadow-sm">
-        <div class="card-header bg-primary text-white">
-            <h4 class="mb-0">Create Student</h4>
-        </div>
-        <div class="card-body">
-            <form asp-action="Create" method="post">
-                <div class="mb-3">
-                    <label asp-for="Name" class="form-label"></label>
-                    <input asp-for="Name" class="form-control" placeholder="Enter full name" />
-                    <span asp-validation-for="Name" class="text-danger"></span>
-                </div>
+@{
+    ViewData["Title"] = "Add New Student";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+}
 
-                <div class="mb-3">
-                    <label asp-for="Age" class="form-label"></label>
-                    <input asp-for="Age" class="form-control" placeholder="Enter age" />
-                    <span asp-validation-for="Age" class="text-danger"></span>
-                </div>
+<style>
+    .create-form-container {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+    
+    .form-header {
+        background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+        color: white;
+        padding: 25px 30px;
+        position: relative;
+    }
+    
+    .form-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        animation: rotate 20s linear infinite;
+    }
+    
+    @@keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    .form-header-content {
+        position: relative;
+        z-index: 2;
+    }
+    
+    .form-header h4 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    
+    .form-header p {
+        margin: 8px 0 0 0;
+        opacity: 0.9;
+        font-size: 0.95rem;
+    }
+    
+    .form-body {
+        padding: 40px 30px;
+    }
+    
+    .professional-input-group {
+        margin-bottom: 25px;
+    }
+    
+    .professional-label {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .professional-input {
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        padding: 12px 16px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: #f8f9fa;
+    }
+    
+    .professional-input:focus {
+        border-color: #27ae60;
+        box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1);
+        background: #fff;
+        outline: none;
+    }
+    
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 15px;
+        padding-top: 20px;
+        border-top: 1px solid #e9ecef;
+    }
+    
+    .professional-btn {
+        padding: 12px 25px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 500;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+        cursor: pointer;
+    }
+    
+    .btn-save {
+        background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+        color: white;
+    }
+    
+    .btn-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(39, 174, 96, 0.4);
+        color: white;
+    }
+    
+    .btn-cancel {
+        background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+        color: white;
+    }
+    
+    .btn-cancel:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(108, 117, 125, 0.4);
+        color: white;
+    }
+    
+    .validation-error {
+        color: #e74c3c;
+        font-size: 0.85rem;
+        margin-top: 5px;
+        display: block;
+    }
+    
+    .input-icon {
+        color: #7f8c8d;
+    }
+</style>
 
-                <div class="d-flex justify-content-end">
-                    <button type="submit" class="btn btn-success me-2">
-                        <i class="bi bi-check-circle"></i> Save
-                    </button>
-                    <a asp-action="Index" class="btn btn-secondary">
-                        <i class="bi bi-x-circle"></i> Cancel
-                    </a>
-                </div>
-            </form>
+<div class="create-form-container">
+    <div class="form-header">
+        <div class="form-header-content">
+            <h4>
+                <i class="fas fa-user-plus"></i>
+                Add New Student
+            </h4>
+            <p>Enter student information to add them to the system</p>
         </div>
     </div>
+    
+    <div class="form-body">
+        <form asp-action="Create" method="post">
+            <div class="professional-input-group">
+                <label asp-for="Name" class="professional-label">
+                    <i class="fas fa-user input-icon"></i>
+                    Full Name
+                </label>
+                <input asp-for="Name" class="form-control professional-input" 
+                       placeholder="Enter student's full name" autocomplete="name" />
+                <span asp-validation-for="Name" class="validation-error"></span>
+            </div>
+
+            <div class="professional-input-group">
+                <label asp-for="Age" class="professional-label">
+                    <i class="fas fa-calendar-alt input-icon"></i>
+                    Age
+                </label>
+                <input asp-for="Age" class="form-control professional-input" 
+                       placeholder="Enter student's age" type="number" min="1" max="150" />
+                <span asp-validation-for="Age" class="validation-error"></span>
+            </div>
+
+            <div class="form-actions">
+                <a asp-action="Index" class="professional-btn btn-cancel">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </a>
+                <button type="submit" class="professional-btn btn-save">
+                    <i class="fas fa-save"></i>
+                    Save Student
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,170 +1,37 @@
 ﻿@model OfflineAuthDemo.Models.LoginViewModel
 @{
+    Layout = "~/Views/Shared/_AuthLayout.cshtml";
     ViewData["Title"] = "Login";
 }
 
-<div class="login-container">
-    <div class="login-card">
-        <h2 class="login-title">🔐 Secure Login</h2>
-        <p class="login-subtitle">Welcome back! Please enter your credentials</p>
+<form asp-action="Login" method="post">
+    <div asp-validation-summary="All" class="text-warning small mb-3"></div>
 
-        <form asp-action="Login" method="post" class="login-form">
-            <div asp-validation-summary="All" class="text-danger mb-3"></div>
-
-            <div class="form-group mb-3">
-                <label asp-for="Email" class="form-label"></label>
-                <input asp-for="Email" class="form-control futuristic-input" placeholder="Enter your email" />
-                <span asp-validation-for="Email" class="text-danger"></span>
-            </div>
-
-            <div class="form-group mb-3 position-relative">
-                <label asp-for="Password" class="form-label"></label>
-                <input asp-for="Password" class="form-control futuristic-input" placeholder="Enter your password" id="passwordInput" />
-                <span asp-validation-for="Password" class="text-danger"></span>
-                <button type="button" class="btn btn-sm show-password-btn" onclick="togglePassword()">
-                    👁️
-                </button>
-            </div>
-
-            <div class="form-group form-check mb-3">
-                <input asp-for="RememberMe" class="form-check-input" />
-                <label asp-for="RememberMe" class="form-check-label"></label>
-            </div>
-
-            <button type="submit" class="btn futuristic-btn">🚀 Login</button>
-        </form>
+    <div class="mb-3">
+        <label asp-for="Email" class="form-label">Email</label>
+        <input asp-for="Email" class="form-control auth-input" autocomplete="username" />
+        <span asp-validation-for="Email" class="text-warning small"></span>
     </div>
-</div>
+
+    <div class="mb-3">
+        <label asp-for="Password" class="form-label">Password</label>
+        <input asp-for="Password" class="form-control auth-input" autocomplete="current-password" />
+        <span asp-validation-for="Password" class="text-warning small"></span>
+    </div>
+
+    <div class="form-check mb-3">
+        <input asp-for="RememberMe" class="form-check-input" />
+        <label asp-for="RememberMe" class="form-check-label"></label>
+    </div>
+
+    <div class="d-grid">
+        <button type="submit" class="btn btn-lg auth-btn">Sign in</button>
+    </div>
+    <div class="mt-3 text-center">
+        <a asp-controller="Account" asp-action="Register" class="link-light text-decoration-none">Create an account</a>
+    </div>
+</form>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-    <script>
-        function togglePassword() {
-            var passwordInput = document.getElementById("passwordInput");
-            if (passwordInput.type === "password") {
-                passwordInput.type = "text";
-            } else {
-                passwordInput.type = "password";
-            }
-        }
-    </script>
 }
-
-<style>
-    body {
-        background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        margin: 0;
-    }
-
-    .login-container {
-        width: 100%;
-        max-width: 420px;
-        padding: 15px;
-        box-sizing: border-box;
-    }
-
-    .login-card {
-        background: rgba(255, 255, 255, 0.08);
-        backdrop-filter: blur(20px);
-        border-radius: 20px;
-        padding: 40px 30px;
-        color: #fff;
-        box-shadow: 0 0 50px rgba(0, 255, 255, 0.3);
-        animation: fadeIn 1s ease-in-out;
-        position: relative;
-    }
-
-    .login-title {
-        text-align: center;
-        font-size: 28px;
-        font-weight: bold;
-        margin-bottom: 10px;
-        color: #00f5ff;
-        text-shadow: 0 0 15px #00f5ff;
-    }
-
-    .login-subtitle {
-        text-align: center;
-        font-size: 14px;
-        margin-bottom: 25px;
-        opacity: 0.85;
-    }
-
-    .futuristic-input {
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(0, 255, 255, 0.5);
-        color: #fff;
-        padding: 12px 40px 12px 12px; /* space for eye button */
-        border-radius: 10px;
-        width: 100%;
-        transition: 0.3s ease;
-    }
-
-        .futuristic-input:focus {
-            outline: none;
-            border-color: #00f5ff;
-            box-shadow: 0 0 15px #00f5ff;
-        }
-
-    .futuristic-btn {
-        width: 100%;
-        background: linear-gradient(90deg, #00f5ff, #00ffa3);
-        border: none;
-        padding: 12px;
-        border-radius: 12px;
-        font-size: 16px;
-        font-weight: bold;
-        color: #000;
-        margin-top: 15px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-
-        .futuristic-btn:hover {
-            background: linear-gradient(90deg, #00ffa3, #00f5ff);
-            box-shadow: 0 0 25px #00f5ff;
-            transform: translateY(-3px);
-        }
-
-    .show-password-btn {
-        position: absolute;
-        top: 38px;
-        right: 10px;
-        background: transparent;
-        border: none;
-        color: #00f5ff;
-        cursor: pointer;
-        font-size: 18px;
-        padding: 0;
-    }
-
-    keyframes fadeIn {
-        from
-
-    {
-        opacity: 0;
-        transform: translateY(50px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-
-    }
-
-    media (max-width: 480px) {
-        .login-card
-
-    {
-        padding: 30px 20px;
-        width: 100%;
-    }
-
-    }
-</style>

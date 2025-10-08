@@ -1,44 +1,481 @@
-﻿@model IEnumerable<ReportDemo.Models.Student>   // ✅ fixed namespace
+﻿@model IEnumerable<ReportDemo.Models.Student>
 
 @{
-    ViewData["Title"] = "Students";
+    ViewData["Title"] = "Student Management";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
 }
 
-<h2 class="mb-3">Students List</h2>
+<style>
+    /* Professional Dashboard Styles */
+    .stats-overview {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 12px;
+        padding: 25px;
+        text-align: center;
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        animation: rotate 15s linear infinite;
+    }
+    
+    @@keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+    }
+    
+    .stat-card.success {
+        background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+        box-shadow: 0 5px 15px rgba(39, 174, 96, 0.3);
+    }
+    
+    .stat-card.success:hover {
+        box-shadow: 0 15px 35px rgba(39, 174, 96, 0.4);
+    }
+    
+    .stat-card.warning {
+        background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+        box-shadow: 0 5px 15px rgba(243, 156, 18, 0.3);
+    }
+    
+    .stat-card.warning:hover {
+        box-shadow: 0 15px 35px rgba(243, 156, 18, 0.4);
+    }
+    
+    .stat-card.danger {
+        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+    }
+    
+    .stat-card.danger:hover {
+        box-shadow: 0 15px 35px rgba(231, 76, 60, 0.4);
+    }
+    
+    .stat-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin: 10px 0;
+        position: relative;
+        z-index: 2;
+    }
+    
+    .stat-label {
+        font-size: 1rem;
+        opacity: 0.9;
+        font-weight: 500;
+        position: relative;
+        z-index: 2;
+    }
+    
+    .stat-icon {
+        font-size: 3rem;
+        opacity: 0.2;
+        position: absolute;
+        top: 50%;
+        right: 20px;
+        transform: translateY(-50%);
+        z-index: 1;
+    }
+    
+    .action-toolbar {
+        background: #fff;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+    
+    .toolbar-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin: 0;
+    }
+    
+    .toolbar-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+    
+    .professional-btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 500;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+        text-transform: none;
+    }
+    
+    .btn-primary-prof {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        color: white;
+    }
+    
+    .btn-primary-prof:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(52, 152, 219, 0.4);
+        color: white;
+    }
+    
+    .btn-success-prof {
+        background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+        color: white;
+    }
+    
+    .btn-success-prof:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(39, 174, 96, 0.4);
+        color: white;
+    }
+    
+    .data-table-container {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+    
+    .table-header-section {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        color: white;
+        padding: 20px;
+    }
+    
+    .table-header-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .professional-table {
+        margin: 0;
+    }
+    
+    .professional-table thead th {
+        background: #f8f9fa;
+        border: none;
+        padding: 15px 20px;
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .professional-table tbody td {
+        padding: 18px 20px;
+        border: none;
+        border-bottom: 1px solid #eee;
+        vertical-align: middle;
+    }
+    
+    .professional-table tbody tr {
+        transition: all 0.3s ease;
+    }
+    
+    .professional-table tbody tr:hover {
+        background: #f8f9fa;
+        transform: scale(1.002);
+    }
+    
+    .student-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    
+    .student-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+    
+    .student-details h6 {
+        margin: 0;
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 1rem;
+    }
+    
+    .student-details small {
+        color: #7f8c8d;
+        font-size: 0.85rem;
+    }
+    
+    .student-id-badge {
+        background: #ecf0f1;
+        color: #2c3e50;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+    
+    .age-badge {
+        background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-weight: 500;
+        font-size: 0.85rem;
+    }
+    
+    .action-btn-group {
+        display: flex;
+        gap: 6px;
+    }
+    
+    .action-btn {
+        padding: 8px 12px;
+        border: none;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .btn-view {
+        background: #e8f4f8;
+        color: #2980b9;
+    }
+    
+    .btn-view:hover {
+        background: #3498db;
+        color: white;
+        transform: translateY(-2px);
+    }
+    
+    .btn-edit {
+        background: #fdf2e9;
+        color: #d35400;
+    }
+    
+    .btn-edit:hover {
+        background: #f39c12;
+        color: white;
+        transform: translateY(-2px);
+    }
+    
+    .btn-delete {
+        background: #fdeaea;
+        color: #c0392b;
+    }
+    
+    .btn-delete:hover {
+        background: #e74c3c;
+        color: white;
+        transform: translateY(-2px);
+    }
+    
+    .empty-state-professional {
+        text-align: center;
+        padding: 60px 20px;
+        color: #7f8c8d;
+    }
+    
+    .empty-state-professional i {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        opacity: 0.3;
+    }
+    
+    .empty-state-professional h4 {
+        color: #2c3e50;
+        margin-bottom: 15px;
+    }
+    
+    .empty-state-professional p {
+        font-size: 1.1rem;
+        margin-bottom: 30px;
+    }
+    
+    @@media (max-width: 768px) {
+        .stats-overview {
+            grid-template-columns: 1fr;
+        }
+        
+        .action-toolbar {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .toolbar-actions {
+            width: 100%;
+            justify-content: flex-start;
+        }
+    }
+</style>
 
-<div class="mb-3">
-    <a asp-action="Create" class="btn btn-primary">➕ Create New</a>
-
-    <a asp-action="StudentRDLCReport"
-       asp-controller="Students"
-       class="btn btn-success"
-       target="_blank">
-        📊 View RDLC Report
-    </a>
+<!-- Stats Overview -->
+<div class="stats-overview">
+    <div class="stat-card">
+        <i class="fas fa-users stat-icon"></i>
+        <div class="stat-value">@Model.Count()</div>
+        <div class="stat-label">Total Students</div>
+    </div>
+    
+    <div class="stat-card success">
+        <i class="fas fa-user-graduate stat-icon"></i>
+        <div class="stat-value">@Model.Count(item => item.Age >= 18)</div>
+        <div class="stat-label">Adult Students</div>
+    </div>
+    
+    <div class="stat-card warning">
+        <i class="fas fa-user-clock stat-icon"></i>
+        <div class="stat-value">@Model.Count(item => item.Age < 18)</div>
+        <div class="stat-label">Minor Students</div>
+    </div>
+    
+    <div class="stat-card danger">
+        <i class="fas fa-chart-line stat-icon"></i>
+        <div class="stat-value">@Math.Round(Model.Any() ? Model.Average(s => s.Age) : 0, 1)</div>
+        <div class="stat-label">Average Age</div>
+    </div>
 </div>
 
-<table class="table table-bordered table-striped">
-    <thead class="table-dark">
-        <tr>
-            <th>@Html.DisplayNameFor(model => model.First().Id)</th>
-            <th>@Html.DisplayNameFor(model => model.First().Name)</th>
-            <th>@Html.DisplayNameFor(model => model.First().Age)</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>@item.Id</td>
-                <td>@item.Name</td>
-                <td>@item.Age</td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm">✏️ Edit</a>
-                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm">🔎 Details</a>
-                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm">🗑️ Delete</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+<!-- Action Toolbar -->
+<div class="action-toolbar">
+    <h5 class="toolbar-title">
+        <i class="fas fa-users me-2"></i>
+        Student Records Management
+    </h5>
+    
+    <div class="toolbar-actions">
+        <a asp-action="Create" class="professional-btn btn-primary-prof">
+            <i class="fas fa-plus"></i>
+            Add New Student
+        </a>
+        
+        <a asp-action="StudentRDLCReport"
+           asp-controller="Students"
+           class="professional-btn btn-success-prof"
+           target="_blank">
+            <i class="fas fa-file-pdf"></i>
+            Generate Report
+        </a>
+    </div>
+</div>
+
+<!-- Data Table -->
+<div class="data-table-container">
+    <div class="table-header-section">
+        <h6 class="table-header-title">
+            <i class="fas fa-table"></i>
+            Student Database Records
+        </h6>
+    </div>
+    
+    @if (Model.Any())
+    {
+        <table class="table professional-table">
+            <thead>
+                <tr>
+                    <th>Student ID</th>
+                    <th>Student Information</th>
+                    <th>Age Group</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            <span class="student-id-badge">#@item.Id.ToString("D4")</span>
+                        </td>
+                        <td>
+                            <div class="student-info">
+                                <div class="student-avatar">
+                                    @(item.Name?.Substring(0, 1).ToUpper() ?? "N")
+                                </div>
+                                <div class="student-details">
+                                    <h6>@item.Name</h6>
+                                    <small>Student Record</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="age-badge">@item.Age Years Old</span>
+                        </td>
+                        <td class="text-center">
+                            <div class="action-btn-group">
+                                <a asp-action="Details" asp-route-id="@item.Id" 
+                                   class="action-btn btn-view" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a asp-action="Edit" asp-route-id="@item.Id" 
+                                   class="action-btn btn-edit" title="Edit Student">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a asp-action="Delete" asp-route-id="@item.Id" 
+                                   class="action-btn btn-delete" title="Delete Student">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="empty-state-professional">
+            <i class="fas fa-users"></i>
+            <h4>No Student Records Found</h4>
+            <p>Your student database is currently empty. Start by adding your first student record to the system.</p>
+            <a asp-action="Create" class="professional-btn btn-primary-prof">
+                <i class="fas fa-plus"></i>
+                Add First Student
+            </a>
+        </div>
+    }
+</div>
