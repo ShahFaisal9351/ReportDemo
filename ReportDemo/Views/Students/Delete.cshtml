@@ -246,10 +246,19 @@
         
         <div class="student-card">
             <div class="student-avatar-preview">
-                @(Model.Name?.Substring(0, 1).ToUpper() ?? "N")
+                @((!string.IsNullOrEmpty(Model.FirstName) && Model.FirstName.Length > 0) ? Model.FirstName.Substring(0, 1).ToUpper() : "N")
             </div>
-            <div class="student-name-preview">@Model.Name</div>
-            <div class="student-details-preview">@Model.Age years old</div>
+            <div class="student-name-preview">@Model.FullName</div>
+            <div class="student-details-preview">
+                Roll: @Model.RollNumber | @Model.ClassName - @Model.Section | @Model.Age years old
+            </div>
+            <div class="student-details-preview mt-2">
+                <i class="fas fa-envelope me-1"></i>@Model.Email | 
+                <i class="fas fa-phone me-1"></i>@Model.PhoneNumber
+            </div>
+            <div class="student-details-preview mt-2">
+                <i class="fas fa-map-marker-alt me-1"></i>@Model.City, @Model.Country
+            </div>
             <div class="student-id-preview">#@Model.Id.ToString("D4")</div>
         </div>
     </div>

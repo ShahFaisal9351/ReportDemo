@@ -144,6 +144,21 @@
     .input-icon {
         color: #7f8c8d;
     }
+    
+    .section-header {
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #e9ecef;
+    }
+    
+    .section-title {
+        color: #2c3e50;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+    }
 </style>
 
 <div class="create-form-container">
@@ -159,24 +174,228 @@
     
     <div class="form-body">
         <form asp-action="Create" method="post">
-            <div class="professional-input-group">
-                <label asp-for="Name" class="professional-label">
-                    <i class="fas fa-user input-icon"></i>
-                    Full Name
-                </label>
-                <input asp-for="Name" class="form-control professional-input" 
-                       placeholder="Enter student's full name" autocomplete="name" />
-                <span asp-validation-for="Name" class="validation-error"></span>
+            <!-- Personal Information Section -->
+            <div class="section-header">
+                <h5 class="section-title"><i class="fas fa-user me-2"></i>Personal Information</h5>
             </div>
-
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="professional-input-group">
+                        <label asp-for="FirstName" class="professional-label">
+                            <i class="fas fa-user input-icon"></i>
+                            First Name
+                        </label>
+                        <input asp-for="FirstName" class="form-control professional-input" 
+                               placeholder="Enter first name" autocomplete="given-name" />
+                        <span asp-validation-for="FirstName" class="validation-error"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="professional-input-group">
+                        <label asp-for="LastName" class="professional-label">
+                            <i class="fas fa-user input-icon"></i>
+                            Last Name
+                        </label>
+                        <input asp-for="LastName" class="form-control professional-input" 
+                               placeholder="Enter last name" autocomplete="family-name" />
+                        <span asp-validation-for="LastName" class="validation-error"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="professional-input-group">
+                        <label asp-for="Gender" class="professional-label">
+                            <i class="fas fa-venus-mars input-icon"></i>
+                            Gender
+                        </label>
+                        <select asp-for="Gender" class="form-control professional-input">
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <span asp-validation-for="Gender" class="validation-error"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="professional-input-group">
+                        <label asp-for="Age" class="professional-label">
+                            <i class="fas fa-calendar-alt input-icon"></i>
+                            Age
+                        </label>
+                        <input asp-for="Age" class="form-control professional-input" 
+                               placeholder="Enter age" type="number" min="5" max="100" />
+                        <span asp-validation-for="Age" class="validation-error"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Academic Information Section -->
+            <div class="section-header mt-4">
+                <h5 class="section-title"><i class="fas fa-graduation-cap me-2"></i>Academic Information</h5>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="professional-input-group">
+                        <label asp-for="RollNumber" class="professional-label">
+                            <i class="fas fa-id-card input-icon"></i>
+                            Roll Number
+                        </label>
+                        <input asp-for="RollNumber" class="form-control professional-input" 
+                               placeholder="Enter roll number" />
+                        <span asp-validation-for="RollNumber" class="validation-error"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="professional-input-group">
+                        <label asp-for="ClassName" class="professional-label">
+                            <i class="fas fa-chalkboard input-icon"></i>
+                            Class
+                        </label>
+                        <input asp-for="ClassName" class="form-control professional-input" 
+                               placeholder="Enter class name" />
+                        <span asp-validation-for="ClassName" class="validation-error"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="professional-input-group">
+                        <label asp-for="Section" class="professional-label">
+                            <i class="fas fa-list input-icon"></i>
+                            Section
+                        </label>
+                        <input asp-for="Section" class="form-control professional-input" 
+                               placeholder="Enter section" />
+                        <span asp-validation-for="Section" class="validation-error"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="professional-input-group">
+                        <label asp-for="MajorSubject" class="professional-label">
+                            <i class="fas fa-book input-icon"></i>
+                            Major Subject
+                        </label>
+                        <input asp-for="MajorSubject" class="form-control professional-input" 
+                               placeholder="Enter major subject (optional)" />
+                        <span asp-validation-for="MajorSubject" class="validation-error"></span>
+                    </div>
+                </div>
+            </div>
+            
             <div class="professional-input-group">
-                <label asp-for="Age" class="professional-label">
-                    <i class="fas fa-calendar-alt input-icon"></i>
-                    Age
+                <label asp-for="EnrollmentDate" class="professional-label">
+                    <i class="fas fa-calendar-check input-icon"></i>
+                    Enrollment Date
                 </label>
-                <input asp-for="Age" class="form-control professional-input" 
-                       placeholder="Enter student's age" type="number" min="1" max="150" />
-                <span asp-validation-for="Age" class="validation-error"></span>
+                <input asp-for="EnrollmentDate" class="form-control professional-input" 
+                       type="date" />
+                <span asp-validation-for="EnrollmentDate" class="validation-error"></span>
+            </div>
+            
+            <!-- Contact Information Section -->
+            <div class="section-header mt-4">
+                <h5 class="section-title"><i class="fas fa-envelope me-2"></i>Contact Information</h5>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="professional-input-group">
+                        <label asp-for="Email" class="professional-label">
+                            <i class="fas fa-envelope input-icon"></i>
+                            Email Address
+                        </label>
+                        <input asp-for="Email" class="form-control professional-input" 
+                               placeholder="Enter email address" type="email" autocomplete="email" />
+                        <span asp-validation-for="Email" class="validation-error"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="professional-input-group">
+                        <label asp-for="PhoneNumber" class="professional-label">
+                            <i class="fas fa-phone input-icon"></i>
+                            Phone Number
+                        </label>
+                        <input asp-for="PhoneNumber" class="form-control professional-input" 
+                               placeholder="Enter phone number" type="tel" autocomplete="tel" />
+                        <span asp-validation-for="PhoneNumber" class="validation-error"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Address Information Section -->
+            <div class="section-header mt-4">
+                <h5 class="section-title"><i class="fas fa-map-marker-alt me-2"></i>Address Information</h5>
+            </div>
+            
+            <div class="professional-input-group">
+                <label asp-for="Address" class="professional-label">
+                    <i class="fas fa-home input-icon"></i>
+                    Address
+                </label>
+                <textarea asp-for="Address" class="form-control professional-input" 
+                          placeholder="Enter full address" rows="3"></textarea>
+                <span asp-validation-for="Address" class="validation-error"></span>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="professional-input-group">
+                        <label asp-for="City" class="professional-label">
+                            <i class="fas fa-city input-icon"></i>
+                            City
+                        </label>
+                        <input asp-for="City" class="form-control professional-input" 
+                               placeholder="Enter city" />
+                        <span asp-validation-for="City" class="validation-error"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="professional-input-group">
+                        <label asp-for="Country" class="professional-label">
+                            <i class="fas fa-globe input-icon"></i>
+                            Country
+                        </label>
+                        <input asp-for="Country" class="form-control professional-input" 
+                               placeholder="Enter country" />
+                        <span asp-validation-for="Country" class="validation-error"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Guardian Information Section -->
+            <div class="section-header mt-4">
+                <h5 class="section-title"><i class="fas fa-users me-2"></i>Guardian Information</h5>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="professional-input-group">
+                        <label asp-for="GuardianName" class="professional-label">
+                            <i class="fas fa-user-shield input-icon"></i>
+                            Guardian Name
+                        </label>
+                        <input asp-for="GuardianName" class="form-control professional-input" 
+                               placeholder="Enter guardian's full name" />
+                        <span asp-validation-for="GuardianName" class="validation-error"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="professional-input-group">
+                        <label asp-for="GuardianContact" class="professional-label">
+                            <i class="fas fa-phone-alt input-icon"></i>
+                            Guardian Contact
+                        </label>
+                        <input asp-for="GuardianContact" class="form-control professional-input" 
+                               placeholder="Enter guardian's contact number" type="tel" />
+                        <span asp-validation-for="GuardianContact" class="validation-error"></span>
+                    </div>
+                </div>
             </div>
 
             <div class="form-actions">

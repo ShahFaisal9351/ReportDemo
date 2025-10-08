@@ -198,6 +198,21 @@
         color: white;
     }
     
+    .section-header {
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #e9ecef;
+    }
+    
+    .section-title {
+        color: #2c3e50;
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+    }
+    
     @@media (max-width: 768px) {
         .actions-section {
             flex-direction: column;
@@ -214,25 +229,45 @@
     <div class="details-header">
         <div class="details-header-content">
             <div class="student-avatar-large">
-                @(Model.Name?.Substring(0, 1).ToUpper() ?? "N")
+                @((!string.IsNullOrEmpty(Model.FirstName) && Model.FirstName.Length > 0) ? Model.FirstName.Substring(0, 1).ToUpper() : "N")
             </div>
-            <h1 class="student-title">@Model.Name</h1>
-            <p class="student-subtitle">Student Profile Details</p>
+            <h1 class="student-title">@Model.FullName</h1>
+            <p class="student-subtitle">@Model.ClassName - @Model.Section</p>
             <div class="student-id-large">
                 <i class="fas fa-id-badge"></i>
-                Student ID: #@Model.Id.ToString("D4")
+                Roll: @Model.RollNumber | ID: #@Model.Id.ToString("D4")
             </div>
         </div>
     </div>
     
     <div class="details-body">
+        <!-- Personal Information Section -->
+        <div class="section-header mb-4">
+            <h4 class="section-title"><i class="fas fa-user me-2"></i>Personal Information</h4>
+        </div>
         <div class="info-grid">
             <div class="info-card">
                 <div class="info-label">
                     <i class="fas fa-user"></i>
-                    Full Name
+                    First Name
                 </div>
-                <div class="info-value">@Model.Name</div>
+                <div class="info-value">@Model.FirstName</div>
+            </div>
+            
+            <div class="info-card">
+                <div class="info-label">
+                    <i class="fas fa-user"></i>
+                    Last Name
+                </div>
+                <div class="info-value">@Model.LastName</div>
+            </div>
+            
+            <div class="info-card">
+                <div class="info-label">
+                    <i class="fas fa-venus-mars"></i>
+                    Gender
+                </div>
+                <div class="info-value">@Model.Gender</div>
             </div>
             
             <div class="info-card">
@@ -247,7 +282,133 @@
                     </span>
                 </div>
             </div>
+        </div>
+        
+        <!-- Academic Information Section -->
+        <div class="section-header mb-4 mt-5">
+            <h4 class="section-title"><i class="fas fa-graduation-cap me-2"></i>Academic Information</h4>
+        </div>
+        <div class="info-grid">
+            <div class="info-card">
+                <div class="info-label">
+                    <i class="fas fa-id-card"></i>
+                    Roll Number
+                </div>
+                <div class="info-value">@Model.RollNumber</div>
+            </div>
             
+            <div class="info-card">
+                <div class="info-label">
+                    <i class="fas fa-chalkboard"></i>
+                    Class
+                </div>
+                <div class="info-value">@Model.ClassName</div>
+            </div>
+            
+            <div class="info-card">
+                <div class="info-label">
+                    <i class="fas fa-list"></i>
+                    Section
+                </div>
+                <div class="info-value">@Model.Section</div>
+            </div>
+            
+            <div class="info-card">
+                <div class="info-label">
+                    <i class="fas fa-book"></i>
+                    Major Subject
+                </div>
+                <div class="info-value">@(Model.MajorSubject ?? "Not Specified")</div>
+            </div>
+            
+            <div class="info-card">
+                <div class="info-label">
+                    <i class="fas fa-calendar-check"></i>
+                    Enrollment Date
+                </div>
+                <div class="info-value">@Model.EnrollmentDate.ToString("MMM dd, yyyy")</div>
+            </div>
+        </div>
+        
+        <!-- Contact Information Section -->
+        <div class="section-header mb-4 mt-5">
+            <h4 class="section-title"><i class="fas fa-envelope me-2"></i>Contact Information</h4>
+        </div>
+        <div class="info-grid">
+            <div class="info-card">
+                <div class="info-label">
+                    <i class="fas fa-envelope"></i>
+                    Email Address
+                </div>
+                <div class="info-value">@Model.Email</div>
+            </div>
+            
+            <div class="info-card">
+                <div class="info-label">
+                    <i class="fas fa-phone"></i>
+                    Phone Number
+                </div>
+                <div class="info-value">@Model.PhoneNumber</div>
+            </div>
+        </div>
+        
+        <!-- Address Information Section -->
+        <div class="section-header mb-4 mt-5">
+            <h4 class="section-title"><i class="fas fa-map-marker-alt me-2"></i>Address Information</h4>
+        </div>
+        <div class="info-grid">
+            <div class="info-card" style="grid-column: 1 / -1;">
+                <div class="info-label">
+                    <i class="fas fa-home"></i>
+                    Full Address
+                </div>
+                <div class="info-value">@Model.Address</div>
+            </div>
+            
+            <div class="info-card">
+                <div class="info-label">
+                    <i class="fas fa-city"></i>
+                    City
+                </div>
+                <div class="info-value">@Model.City</div>
+            </div>
+            
+            <div class="info-card">
+                <div class="info-label">
+                    <i class="fas fa-globe"></i>
+                    Country
+                </div>
+                <div class="info-value">@Model.Country</div>
+            </div>
+        </div>
+        
+        <!-- Guardian Information Section -->
+        <div class="section-header mb-4 mt-5">
+            <h4 class="section-title"><i class="fas fa-users me-2"></i>Guardian Information</h4>
+        </div>
+        <div class="info-grid">
+            <div class="info-card">
+                <div class="info-label">
+                    <i class="fas fa-user-shield"></i>
+                    Guardian Name
+                </div>
+                <div class="info-value">@Model.GuardianName</div>
+            </div>
+            
+            <div class="info-card">
+                <div class="info-label">
+                    <i class="fas fa-phone-alt"></i>
+                    Guardian Contact
+                </div>
+                <div class="info-value">@Model.GuardianContact</div>
+            </div>
+        </div>
+        
+        <!-- System Information Section -->
+        <div class="section-header mb-4 mt-5">
+            <h4 class="section-title"><i class="fas fa-info-circle me-2"></i>System Information</h4>
+        </div>
+        <div class="info-grid">
             <div class="info-card">
                 <div class="info-label">
                     <i class="fas fa-hash"></i>
@@ -258,7 +419,23 @@
             
             <div class="info-card">
                 <div class="info-label">
-                    <i class="fas fa-info-circle"></i>
+                    <i class="fas fa-calendar-plus"></i>
+                    Created At
+                </div>
+                <div class="info-value">@Model.CreatedAt.ToString("MMM dd, yyyy 'at' hh:mm tt")</div>
+            </div>
+            
+            <div class="info-card">
+                <div class="info-label">
+                    <i class="fas fa-edit"></i>
+                    Last Updated
+                </div>
+                <div class="info-value">@Model.UpdatedAt.ToString("MMM dd, yyyy 'at' hh:mm tt")</div>
+            </div>
+            
+            <div class="info-card">
+                <div class="info-label">
+                    <i class="fas fa-check-circle"></i>
                     Status
                 </div>
                 <div class="info-value" style="color: #27ae60;">Active Student</div>

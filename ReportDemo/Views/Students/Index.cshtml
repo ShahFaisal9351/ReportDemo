@@ -418,9 +418,11 @@
         <table class="table professional-table">
             <thead>
                 <tr>
-                    <th>Student ID</th>
+                    <th>Roll Number</th>
                     <th>Student Information</th>
-                    <th>Age Group</th>
+                    <th>Class & Section</th>
+                    <th>Contact Info</th>
+                    <th>Age</th>
                     <th class="text-center">Actions</th>
                 </tr>
             </thead>
@@ -429,21 +431,33 @@
                 {
                     <tr>
                         <td>
-                            <span class="student-id-badge">#@item.Id.ToString("D4")</span>
+                            <span class="student-id-badge">@item.RollNumber</span>
                         </td>
                         <td>
                             <div class="student-info">
                                 <div class="student-avatar">
-                                    @(item.Name?.Substring(0, 1).ToUpper() ?? "N")
+                                    @((!string.IsNullOrEmpty(item.FirstName) && item.FirstName.Length > 0) ? item.FirstName.Substring(0, 1).ToUpper() : "N")
                                 </div>
                                 <div class="student-details">
-                                    <h6>@item.Name</h6>
-                                    <small>Student Record</small>
+                                    <h6>@item.FullName</h6>
+                                    <small><i class="fas fa-envelope me-1"></i>@item.Email</small>
                                 </div>
                             </div>
                         </td>
                         <td>
-                            <span class="age-badge">@item.Age Years Old</span>
+                            <div>
+                                <strong class="d-block text-primary">@item.ClassName - @item.Section</strong>
+                                <small class="text-muted">@item.MajorSubject</small>
+                            </div>
+                        </td>
+                        <td>
+                            <div>
+                                <small class="d-block"><i class="fas fa-phone me-1"></i>@item.PhoneNumber</small>
+                                <small class="text-muted"><i class="fas fa-map-marker-alt me-1"></i>@item.City, @item.Country</small>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="age-badge">@item.Age Years</span>
                         </td>
                         <td class="text-center">
                             <div class="action-btn-group">

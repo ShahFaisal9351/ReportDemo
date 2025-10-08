@@ -50,6 +50,20 @@ namespace ReportDemo.Controllers
         {
             if (ModelState.IsValid)
             {
+                // Convert all DateTime values to UTC for PostgreSQL compatibility
+                student.CreatedAt = DateTime.UtcNow;
+                student.UpdatedAt = DateTime.UtcNow;
+                
+                // Convert EnrollmentDate to UTC if it's not already
+                if (student.EnrollmentDate.Kind == DateTimeKind.Unspecified)
+                {
+                    student.EnrollmentDate = DateTime.SpecifyKind(student.EnrollmentDate, DateTimeKind.Utc);
+                }
+                else if (student.EnrollmentDate.Kind == DateTimeKind.Local)
+                {
+                    student.EnrollmentDate = student.EnrollmentDate.ToUniversalTime();
+                }
+                
                 _context.Add(student);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -78,6 +92,18 @@ namespace ReportDemo.Controllers
             {
                 try
                 {
+                    student.UpdatedAt = DateTime.UtcNow;
+                    
+                    // Convert EnrollmentDate to UTC if it's not already
+                    if (student.EnrollmentDate.Kind == DateTimeKind.Unspecified)
+                    {
+                        student.EnrollmentDate = DateTime.SpecifyKind(student.EnrollmentDate, DateTimeKind.Utc);
+                    }
+                    else if (student.EnrollmentDate.Kind == DateTimeKind.Local)
+                    {
+                        student.EnrollmentDate = student.EnrollmentDate.ToUniversalTime();
+                    }
+                    
                     _context.Update(student);
                     await _context.SaveChangesAsync();
                 }
