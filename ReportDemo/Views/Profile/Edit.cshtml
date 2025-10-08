@@ -1,0 +1,107 @@
+@model ReportDemo.Models.UserProfile
+
+@{
+    ViewData["Title"] = "Edit Profile";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-edit"></i> Edit Profile
+                    </h4>
+                </div>
+                <div class="card-body">
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            @TempData["Error"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <form asp-action="Edit" method="post" enctype="multipart/form-data">
+                        <input asp-for="Id" type="hidden" />
+                        <input asp-for="UserId" type="hidden" />
+                        <input asp-for="CreatedAt" type="hidden" />
+                        <input asp-for="ProfilePicturePath" type="hidden" />
+
+                        <div class="row">
+                            <div class="col-md-4 text-center">
+                                <div class="mb-3">
+                                    <label class="form-label"><strong>Profile Picture</strong></label>
+                                    @if (!string.IsNullOrEmpty(Model.ProfilePicturePath))
+                                    {
+                                        <img id="profilePreview" src="@Model.ProfilePicturePath" alt="Profile Picture" class="img-fluid rounded-circle mb-3 d-block mx-auto" style="width: 150px; height: 150px; object-fit: cover;">
+                                    }
+                                    else
+                                    {
+                                        <div id="profilePreview" class="bg-secondary rounded-circle d-flex align-items-center justify-content-center mb-3 mx-auto" style="width: 150px; height: 150px;">
+                                            <i class="fas fa-user fa-4x text-white"></i>
+                                        </div>
+                                    }
+                                    <input type="file" class="form-control" id="profilePicture" name="profilePicture" accept="image/*" onchange="previewImage(this)">
+                                    <small class="form-text text-muted">Choose an image file (JPG, PNG, GIF)</small>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label asp-for="FirstName" class="form-label"></label>
+                                    <input asp-for="FirstName" class="form-control" placeholder="Enter your first name">
+                                    <span asp-validation-for="FirstName" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="LastName" class="form-label"></label>
+                                    <input asp-for="LastName" class="form-control" placeholder="Enter your last name">
+                                    <span asp-validation-for="LastName" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="PhoneNumber" class="form-label"></label>
+                                    <input asp-for="PhoneNumber" class="form-control" placeholder="Enter your phone number">
+                                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Bio" class="form-label"></label>
+                                    <textarea asp-for="Bio" class="form-control" rows="4" placeholder="Tell us about yourself..."></textarea>
+                                    <span asp-validation-for="Bio" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-12 text-center">
+                                <button type="submit" class="btn btn-primary me-2">
+                                    <i class="fas fa-save"></i> Save Changes
+                                </button>
+                                <a href="@Url.Action("Index", "Profile")" class="btn btn-secondary">
+                                    <i class="fas fa-times"></i> Cancel
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById('profilePreview').innerHTML = 
+                        '<img src="' + e.target.result + '" alt="Profile Picture" class="img-fluid rounded-circle mb-3 d-block mx-auto" style="width: 150px; height: 150px; object-fit: cover;">';
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

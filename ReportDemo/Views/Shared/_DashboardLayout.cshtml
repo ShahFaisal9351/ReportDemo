@@ -165,6 +165,20 @@
             justify-content: center;
             color: #fff;
             font-weight: 600;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        
+        .user-avatar span {
+            font-size: 16px;
+            font-weight: 600;
         }
 
         .user-info h6 {
@@ -309,6 +323,13 @@
             <div class="sidebar-menu-title">System</div>
             
             <div class="sidebar-menu-item">
+                <a asp-controller="Profile" asp-action="Index" class="sidebar-menu-link">
+                    <i class="fas fa-user"></i>
+                    <span>My Profile</span>
+                </a>
+            </div>
+            
+            <div class="sidebar-menu-item">
                 <a href="javascript:void(0);" onclick="showSettings()" class="sidebar-menu-link">
                     <i class="fas fa-cog"></i>
                     <span>Settings</span>
@@ -334,20 +355,7 @@
         <div class="topbar-right">
             @if (User.Identity?.IsAuthenticated ?? false)
             {
-                <div class="user-profile">
-                    <div class="user-avatar">
-                        @(User.Identity.Name?.Substring(0, 1).ToUpper() ?? "U")
-                    </div>
-                    <div class="user-info">
-                        <h6>@User.Identity.Name</h6>
-                        <small>Administrator</small>
-                    </div>
-                    <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
-                        <button type="submit" class="logout-btn" title="Logout">
-                            <i class="fas fa-sign-out-alt"></i>
-                        </button>
-                    </form>
-                </div>
+                @await Component.InvokeAsync("UserAvatar")
             }
         </div>
     </div>
@@ -368,9 +376,9 @@
             document.querySelector('.sidebar').classList.toggle('show');
         }
         
-        // Settings modal
+        // Settings redirect to Profile
         function showSettings() {
-            alert('🔧 Settings Panel\n\nThis section would typically include:\n\n• User Profile Settings\n• System Configurations\n• Data Export/Import Options\n• Notification Preferences\n• Security Settings\n\nFeature coming soon!');
+            window.location.href = '@Url.Action("Index", "Profile")';
         }
         
         // Privacy Policy modal
