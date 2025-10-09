@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace OfflineAuthDemo.Models
+namespace ReportDemo.Models
 {
     public class RegisterViewModel
     {

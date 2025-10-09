@@ -2,18 +2,21 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ReportDemo.Data;
 
 #nullable disable
 
-namespace ReportDemo.Migrations
+namespace ReportDemo.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251009050615_AddClassModelAndUpdateStudentWithDataMigration")]
+    partial class AddClassModelAndUpdateStudentWithDataMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -218,148 +221,6 @@ namespace ReportDemo.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("ReportDemo.Models.Alumni", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("AcademicYear")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)");
-
-                    b.Property<string>("Address")
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.Property<string>("City")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<string>("Country")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp without time zone")
-                        .HasDefaultValueSql("NOW()");
-
-                    b.Property<string>("CurrentAddress")
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.Property<string>("CurrentEmail")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("CurrentEmployer")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("CurrentOccupation")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("CurrentPhone")
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
-
-                    b.Property<DateTime>("DateOfBirth")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<DateTime?>("EnrollmentDate")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<string>("FinalGrade")
-                        .HasMaxLength(5)
-                        .HasColumnType("character varying(5)");
-
-                    b.Property<double?>("FinalPercentage")
-                        .HasColumnType("double precision");
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<string>("Gender")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)");
-
-                    b.Property<int>("GraduatedFromClassId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("GraduationDate")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<string>("GraduationStatus")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
-
-                    b.Property<string>("GuardianContact")
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
-
-                    b.Property<string>("GuardianName")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("HigherEducation")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<int>("OriginalStudentId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("PhoneNumber")
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
-
-                    b.Property<string>("ProfileImage")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<string>("RollNumber")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp without time zone")
-                        .HasDefaultValueSql("NOW()");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Email")
-                        .IsUnique()
-                        .HasDatabaseName("IX_Alumni_Email");
-
-                    b.HasIndex("GraduatedFromClassId");
-
-                    b.HasIndex("OriginalStudentId")
-                        .IsUnique()
-                        .HasDatabaseName("IX_Alumni_OriginalStudentId");
-
-                    b.ToTable("Alumni");
-                });
-
             modelBuilder.Entity("ReportDemo.Models.Class", b =>
                 {
                     b.Property<int>("Id")
@@ -403,143 +264,6 @@ namespace ReportDemo.Migrations
                         .HasDatabaseName("IX_Classes_ClassName_Section");
 
                     b.ToTable("Classes");
-                });
-
-            modelBuilder.Entity("ReportDemo.Models.ExamResult", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("AcademicYear")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)");
-
-                    b.Property<int>("ClassId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("ConductedBy")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp without time zone")
-                        .HasDefaultValueSql("NOW()");
-
-                    b.Property<bool>("ExamCompleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTime>("ExamDate")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<string>("Grade")
-                        .IsRequired()
-                        .HasMaxLength(5)
-                        .HasColumnType("character varying(5)");
-
-                    b.Property<bool>("IsPassed")
-                        .HasColumnType("boolean");
-
-                    b.Property<double>("Percentage")
-                        .HasColumnType("double precision");
-
-                    b.Property<string>("Remarks")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<int>("StudentId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Term")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp without time zone")
-                        .HasDefaultValueSql("NOW()");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ClassId");
-
-                    b.HasIndex("StudentId", "Term", "AcademicYear")
-                        .IsUnique()
-                        .HasDatabaseName("IX_ExamResults_Student_Term_Year");
-
-                    b.ToTable("ExamResults");
-                });
-
-            modelBuilder.Entity("ReportDemo.Models.PromotionHistory", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("AcademicYear")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp without time zone")
-                        .HasDefaultValueSql("NOW()");
-
-                    b.Property<string>("FinalGrade")
-                        .HasMaxLength(5)
-                        .HasColumnType("character varying(5)");
-
-                    b.Property<double?>("FinalPercentage")
-                        .HasColumnType("double precision");
-
-                    b.Property<bool>("IsGraduated")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsPromoted")
-                        .HasColumnType("boolean");
-
-                    b.Property<int?>("NewClassId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("OldClassId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("PromotedBy")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<DateTime>("PromotionDate")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<string>("PromotionType")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
-
-                    b.Property<string>("Remarks")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<int>("StudentId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("NewClassId");
-
-                    b.HasIndex("OldClassId");
-
-                    b.HasIndex("StudentId");
-
-                    b.ToTable("PromotionHistories");
                 });
 
             modelBuilder.Entity("ReportDemo.Models.Student", b =>
@@ -741,62 +465,6 @@ namespace ReportDemo.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("ReportDemo.Models.Alumni", b =>
-                {
-                    b.HasOne("ReportDemo.Models.Class", "GraduatedFromClass")
-                        .WithMany()
-                        .HasForeignKey("GraduatedFromClassId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("GraduatedFromClass");
-                });
-
-            modelBuilder.Entity("ReportDemo.Models.ExamResult", b =>
-                {
-                    b.HasOne("ReportDemo.Models.Class", "Class")
-                        .WithMany()
-                        .HasForeignKey("ClassId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("ReportDemo.Models.Student", "Student")
-                        .WithMany()
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Class");
-
-                    b.Navigation("Student");
-                });
-
-            modelBuilder.Entity("ReportDemo.Models.PromotionHistory", b =>
-                {
-                    b.HasOne("ReportDemo.Models.Class", "NewClass")
-                        .WithMany()
-                        .HasForeignKey("NewClassId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("ReportDemo.Models.Class", "OldClass")
-                        .WithMany()
-                        .HasForeignKey("OldClassId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("ReportDemo.Models.Student", "Student")
-                        .WithMany()
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("NewClass");
-
-                    b.Navigation("OldClass");
-
-                    b.Navigation("Student");
                 });
 
             modelBuilder.Entity("ReportDemo.Models.Student", b =>

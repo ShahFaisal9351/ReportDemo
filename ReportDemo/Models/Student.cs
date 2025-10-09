@@ -23,8 +23,10 @@ namespace ReportDemo.Models
         [StringLength(10)]
         public string Gender { get; set; } = string.Empty;
 
-        [Range(5, 100, ErrorMessage = "Age must be between 5 and 100")]
-        public int Age { get; set; }
+        [Required(ErrorMessage = "Date of birth is required")]
+        [DataType(DataType.Date)]
+        [Display(Name = "Date of Birth")]
+        public DateTime DateOfBirth { get; set; }
 
         // Academic Information
         [Required(ErrorMessage = "Roll number is required")]
@@ -32,14 +34,13 @@ namespace ReportDemo.Models
         [Display(Name = "Roll Number")]
         public string RollNumber { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Class name is required")]
-        [StringLength(30, ErrorMessage = "Class name cannot exceed 30 characters")]
+        // Foreign key for Class relationship
+        [Required(ErrorMessage = "Class is required")]
         [Display(Name = "Class")]
-        public string ClassName { get; set; } = string.Empty;
+        public int ClassId { get; set; }
 
-        [Required(ErrorMessage = "Section is required")]
-        [StringLength(10, ErrorMessage = "Section cannot exceed 10 characters")]
-        public string Section { get; set; } = string.Empty;
+        // Navigation property
+        public virtual Class? Class { get; set; }
 
         [StringLength(50, ErrorMessage = "Major subject cannot exceed 50 characters")]
         [Display(Name = "Major Subject")]
@@ -87,6 +88,11 @@ namespace ReportDemo.Models
         [Display(Name = "Guardian Contact")]
         public string GuardianContact { get; set; } = string.Empty;
 
+        // Profile Information
+        [StringLength(255, ErrorMessage = "Profile image path cannot exceed 255 characters")]
+        [Display(Name = "Profile Image")]
+        public string? ProfileImage { get; set; }
+
         // Timestamps
         [Display(Name = "Created At")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
@@ -102,6 +108,19 @@ namespace ReportDemo.Models
         [NotMapped]
         [Display(Name = "Display Name")]
         public string DisplayName => $"{FirstName} {LastName} ({RollNumber})";
+
+        [NotMapped]
+        [Display(Name = "Age")]
+        public int Age
+        {
+            get
+            {
+                var today = DateTime.Today;
+                var age = today.Year - DateOfBirth.Year;
+                if (DateOfBirth.Date > today.AddYears(-age)) age--;
+                return age;
+            }
+        }
 
         // Legacy property for backward compatibility
         [NotMapped]

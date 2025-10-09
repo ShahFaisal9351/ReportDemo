@@ -11,6 +11,10 @@ Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 // Add services
 builder.Services.AddControllersWithViews();
 
+// Register custom services
+builder.Services.AddScoped<ReportDemo.Services.IRollNumberService, ReportDemo.Services.RollNumberService>();
+builder.Services.AddScoped<ReportDemo.Services.IPromotionService, ReportDemo.Services.PromotionService>();
+
 // Configure PostgreSQL to handle DateTime properly
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 

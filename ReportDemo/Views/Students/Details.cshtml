@@ -232,7 +232,14 @@
                 @((!string.IsNullOrEmpty(Model.FirstName) && Model.FirstName.Length > 0) ? Model.FirstName.Substring(0, 1).ToUpper() : "N")
             </div>
             <h1 class="student-title">@Model.FullName</h1>
-            <p class="student-subtitle">@Model.ClassName - @Model.Section</p>
+            @if (Model.Class != null)
+            {
+                <p class="student-subtitle">@Model.Class.ClassName - @Model.Class.Section</p>
+            }
+            else
+            {
+                <p class="student-subtitle text-danger">Class not assigned</p>
+            }
             <div class="student-id-large">
                 <i class="fas fa-id-badge"></i>
                 Roll: @Model.RollNumber | ID: #@Model.Id.ToString("D4")
@@ -302,7 +309,16 @@
                     <i class="fas fa-chalkboard"></i>
                     Class
                 </div>
-                <div class="info-value">@Model.ClassName</div>
+                <div class="info-value">
+                    @if (Model.Class != null)
+                    {
+                        @Model.Class.ClassName
+                    }
+                    else
+                    {
+                        <span class="text-danger">Not assigned</span>
+                    }
+                </div>
             </div>
             
             <div class="info-card">
@@ -310,7 +326,16 @@
                     <i class="fas fa-list"></i>
                     Section
                 </div>
-                <div class="info-value">@Model.Section</div>
+                <div class="info-value">
+                    @if (Model.Class != null)
+                    {
+                        @Model.Class.Section
+                    }
+                    else
+                    {
+                        <span class="text-danger">Not assigned</span>
+                    }
+                </div>
             </div>
             
             <div class="info-card">

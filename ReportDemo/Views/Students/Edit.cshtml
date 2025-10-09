@@ -249,13 +249,13 @@
                 </div>
                 <div class="col-md-6">
                     <div class="professional-input-group">
-                        <label asp-for="Age" class="professional-label">
+                        <label asp-for="DateOfBirth" class="professional-label">
                             <i class="fas fa-calendar-alt input-icon"></i>
-                            Age
+                            Date of Birth
                         </label>
-                        <input asp-for="Age" class="form-control professional-input" 
-                               placeholder="Enter age" type="number" min="5" max="100" />
-                        <span asp-validation-for="Age" class="validation-error"></span>
+                        <input asp-for="DateOfBirth" class="form-control professional-input" 
+                               type="date" max="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                        <span asp-validation-for="DateOfBirth" class="validation-error"></span>
                     </div>
                 </div>
             </div>
@@ -279,29 +279,26 @@
                 </div>
                 <div class="col-md-6">
                     <div class="professional-input-group">
-                        <label asp-for="ClassName" class="professional-label">
+                        <label asp-for="ClassId" class="professional-label">
                             <i class="fas fa-chalkboard input-icon"></i>
                             Class
                         </label>
-                        <input asp-for="ClassName" class="form-control professional-input" 
-                               placeholder="Enter class name" />
-                        <span asp-validation-for="ClassName" class="validation-error"></span>
+                        <select asp-for="ClassId" class="form-control professional-input">
+                            <option value="">Select Class</option>
+                            @if (ViewBag.Classes != null)
+                            {
+                                @foreach (var classItem in (List<ReportDemo.Models.Class>)ViewBag.Classes)
+                                {
+                                    <option value="@classItem.Id">@classItem.DisplayName</option>
+                                }
+                            }
+                        </select>
+                        <span asp-validation-for="ClassId" class="validation-error"></span>
                     </div>
                 </div>
             </div>
             
             <div class="row">
-                <div class="col-md-6">
-                    <div class="professional-input-group">
-                        <label asp-for="Section" class="professional-label">
-                            <i class="fas fa-list input-icon"></i>
-                            Section
-                        </label>
-                        <input asp-for="Section" class="form-control professional-input" 
-                               placeholder="Enter section" />
-                        <span asp-validation-for="Section" class="validation-error"></span>
-                    </div>
-                </div>
                 <div class="col-md-6">
                     <div class="professional-input-group">
                         <label asp-for="MajorSubject" class="professional-label">

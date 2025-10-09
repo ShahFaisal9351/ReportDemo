@@ -250,7 +250,16 @@
             </div>
             <div class="student-name-preview">@Model.FullName</div>
             <div class="student-details-preview">
-                Roll: @Model.RollNumber | @Model.ClassName - @Model.Section | @Model.Age years old
+                Roll: @Model.RollNumber | 
+                @if (Model.Class != null)
+                {
+                    <text>@Model.Class.ClassName - @Model.Class.Section</text>
+                }
+                else
+                {
+                    <span class="text-danger">Class not assigned</span>
+                }
+                | @Model.Age years old
             </div>
             <div class="student-details-preview mt-2">
                 <i class="fas fa-envelope me-1"></i>@Model.Email | 

@@ -1,0 +1,166 @@
+@model ReportDemo.Models.Class
+
+@{
+    ViewData["Title"] = "Delete Class";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Delete Class Confirmation
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Warning!</strong> You are about to delete the following class. This action cannot be undone.
+                    </div>
+
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">
+                                <i class="fas fa-chalkboard-teacher"></i>
+                                Class Information to be Deleted
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-sm-4"><strong>Class Name:</strong></div>
+                                <div class="col-sm-8">@Html.DisplayFor(model => model.ClassName)</div>
+                            </div>
+                            <hr />
+                            <div class="row">
+                                <div class="col-sm-4"><strong>Section:</strong></div>
+                                <div class="col-sm-8">
+                                    <span class="badge bg-secondary">@Html.DisplayFor(model => model.Section)</span>
+                                </div>
+                            </div>
+                            <hr />
+                            <div class="row">
+                                <div class="col-sm-4"><strong>Display Name:</strong></div>
+                                <div class="col-sm-8">
+                                    <strong class="text-primary">@Model.DisplayName</strong>
+                                </div>
+                            </div>
+                            <hr />
+                            <div class="row">
+                                <div class="col-sm-4"><strong>Teacher In Charge:</strong></div>
+                                <div class="col-sm-8">
+                                    @if (!string.IsNullOrEmpty(Model.TeacherInCharge))
+                                    {
+                                        <span>@Html.DisplayFor(model => model.TeacherInCharge)</span>
+                                    }
+                                    else
+                                    {
+                                        <em class="text-muted">Not assigned</em>
+                                    }
+                                </div>
+                            </div>
+                            <hr />
+                            <div class="row">
+                                <div class="col-sm-4"><strong>Room Number:</strong></div>
+                                <div class="col-sm-8">
+                                    @if (!string.IsNullOrEmpty(Model.RoomNumber))
+                                    {
+                                        <span>@Html.DisplayFor(model => model.RoomNumber)</span>
+                                    }
+                                    else
+                                    {
+                                        <em class="text-muted">Not set</em>
+                                    }
+                                </div>
+                            </div>
+                            <hr />
+                            <div class="row">
+                                <div class="col-sm-4"><strong>Students Enrolled:</strong></div>
+                                <div class="col-sm-8">
+                                    @if (Model.Students.Count > 0)
+                                    {
+                                        <span class="badge bg-warning text-dark">
+                                            <i class="fas fa-users"></i>
+                                            @Model.Students.Count student(s)
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check"></i>
+                                            No students enrolled
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+                            <hr />
+                            <div class="row">
+                                <div class="col-sm-4"><strong>Created:</strong></div>
+                                <div class="col-sm-8">
+                                    <small class="text-muted">@Model.CreatedAt.ToString("MMMM dd, yyyy 'at' hh:mm tt")</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (Model.Students.Count > 0)
+                    {
+                        <div class="alert alert-danger">
+                            <i class="fas fa-ban"></i>
+                            <strong>Cannot Delete!</strong> This class has @Model.Students.Count student(s) assigned to it. 
+                            Please reassign or remove these students before deleting the class:
+                            <ul class="mt-2 mb-0">
+                                @foreach (var student in Model.Students.Take(5))
+                                {
+                                    <li>@student.FullName (@student.RollNumber)</li>
+                                }
+                                @if (Model.Students.Count > 5)
+                                {
+                                    <li><em>... and @(Model.Students.Count - 5) more students</em></li>
+                                }
+                            </ul>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i>
+                                Back to Classes
+                            </a>
+                            <a asp-action="Students" asp-route-id="@Model.Id" class="btn btn-info">
+                                <i class="fas fa-users"></i>
+                                View Students
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Ready to Delete:</strong> This class has no students assigned to it and can be safely deleted.
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a asp-action="Index" class="btn btn-outline-secondary me-md-2">
+                                <i class="fas fa-times"></i>
+                                Cancel
+                            </a>
+                            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-info me-md-2">
+                                <i class="fas fa-eye"></i>
+                                View Details
+                            </a>
+                            <form asp-action="Delete" method="post" class="d-inline" 
+                                  onsubmit="return confirm('Are you absolutely sure you want to delete the class @Model.DisplayName? This action cannot be undone!')">
+                                <input type="hidden" asp-for="Id" />
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="fas fa-trash"></i>
+                                    Confirm Delete
+                                </button>
+                            </form>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

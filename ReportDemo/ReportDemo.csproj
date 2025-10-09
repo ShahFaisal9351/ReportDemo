@@ -36,10 +36,5 @@
     <PackageReference Include="System.Data.Odbc" Version="9.0.8" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="rModels">
-      <HintPath>..\rModels\bin\Debug\net8.0\rModels.dll</HintPath>
-    </Reference>
-  </ItemGroup>
 
 </Project>

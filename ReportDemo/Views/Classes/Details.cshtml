@@ -1,0 +1,88 @@
+@model ReportDemo.Models.Class
+
+@{
+    ViewData["Title"] = "Class Details";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-info-circle"></i>
+                        @Model.DisplayName Details
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Class Information</h5>
+                            <table class="table table-bordered">
+                                <tr>
+                                    <th>Class Name</th>
+                                    <td>@Html.DisplayFor(model => model.ClassName)</td>
+                                </tr>
+                                <tr>
+                                    <th>Section</th>
+                                    <td><span class="badge badge-secondary">@Html.DisplayFor(model => model.Section)</span></td>
+                                </tr>
+                                <tr>
+                                    <th>Teacher In Charge</th>
+                                    <td>@Html.DisplayFor(model => model.TeacherInCharge)</td>
+                                </tr>
+                                <tr>
+                                    <th>Room Number</th>
+                                    <td>@Html.DisplayFor(model => model.RoomNumber)</td>
+                                </tr>
+                                <tr>
+                                    <th>Created At</th>
+                                    <td>@Html.DisplayFor(model => model.CreatedAt)</td>
+                                </tr>
+                                <tr>
+                                    <th>Updated At</th>
+                                    <td>@Html.DisplayFor(model => model.UpdatedAt)</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Students (@Model.Students.Count)</h5>
+                            @if (Model.Students.Any())
+                            {
+                                <div class="list-group">
+                                    @foreach (var student in Model.Students.Take(10))
+                                    {
+                                        <div class="list-group-item">
+                                            <strong>@student.FullName</strong> (@student.RollNumber)
+                                        </div>
+                                    }
+                                    @if (Model.Students.Count > 10)
+                                    {
+                                        <div class="list-group-item text-center">
+                                            <a asp-action="Students" asp-route-id="@Model.Id" class="btn btn-sm btn-outline-primary">
+                                                View All @Model.Students.Count Students
+                                            </a>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <p class="text-muted">No students assigned to this class yet.</p>
+                                <a asp-controller="Students" asp-action="Create" class="btn btn-outline-primary">
+                                    <i class="fas fa-user-plus"></i> Add First Student
+                                </a>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Edit</a>
+                        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                        <a asp-action="Students" asp-route-id="@Model.Id" class="btn btn-info">View Students</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

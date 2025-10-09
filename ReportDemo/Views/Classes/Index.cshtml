@@ -1,0 +1,287 @@
+@model IEnumerable<ReportDemo.Models.Class>
+
+@{
+    ViewData["Title"] = "Manage Classes - School Management System";
+    Layout = "_DashboardLayout";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="card-title mb-0">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                            Classes Management
+                        </h3>
+                        <a asp-action="Create" class="btn btn-light btn-sm">
+                            <i class="fas fa-plus"></i> Add New Class
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Search and Filter Section -->
+                    <div class="row mb-3">
+                        <div class="col-md-8">
+                            <form asp-action="Index" method="get">
+                                <div class="input-group">
+                                    <input type="text" name="SearchString" value="@ViewBag.CurrentFilter" 
+                                           placeholder="Search classes, teachers, or rooms..." class="form-control">
+                                    <input type="hidden" name="sortOrder" value="@ViewBag.CurrentSort" />
+                                    <button class="btn btn-outline-primary" type="submit">
+                                        <i class="fas fa-search"></i> Search
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            @if (!string.IsNullOrEmpty(ViewBag.CurrentFilter as string))
+                            {
+                                <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
+                                    <i class="fas fa-times"></i> Clear Filter
+                                </a>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Statistics Cards -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card border-left-primary shadow">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                                Total Classes
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                                @Model.Count()
+                                            </div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-chalkboard-teacher fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card border-left-success shadow">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                                Total Students
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                                @Model.Sum(c => c.Students.Count)
+                                            </div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-users fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card border-left-info shadow">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                                Avg Students/Class
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                                @(Model.Any() ? Math.Round(Model.Average(c => c.Students.Count), 1) : 0)
+                                            </div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-chart-bar fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card border-left-warning shadow">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                                With Teachers
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                                @Model.Count(c => !string.IsNullOrEmpty(c.TeacherInCharge))
+                                            </div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-user-tie fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (Model.Any())
+                    {
+                        <!-- Classes Table -->
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>
+                                            <a asp-action="Index" asp-route-sortOrder="@ViewBag.ClassNameSortParm" 
+                                               asp-route-searchString="@ViewBag.CurrentFilter" 
+                                               class="text-white text-decoration-none">
+                                                Class Name <i class="fas fa-sort"></i>
+                                            </a>
+                                        </th>
+                                        <th>
+                                            <a asp-action="Index" asp-route-sortOrder="@ViewBag.SectionSortParm" 
+                                               asp-route-searchString="@ViewBag.CurrentFilter"
+                                               class="text-white text-decoration-none">
+                                                Section <i class="fas fa-sort"></i>
+                                            </a>
+                                        </th>
+                                        <th>
+                                            <a asp-action="Index" asp-route-sortOrder="@ViewBag.TeacherSortParm" 
+                                               asp-route-searchString="@ViewBag.CurrentFilter"
+                                               class="text-white text-decoration-none">
+                                                Teacher In Charge <i class="fas fa-sort"></i>
+                                            </a>
+                                        </th>
+                                        <th>Room Number</th>
+                                        <th>Students</th>
+                                        <th>Created</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <strong class="text-primary">@Html.DisplayFor(modelItem => item.ClassName)</strong>
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-secondary">@Html.DisplayFor(modelItem => item.Section)</span>
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(item.TeacherInCharge))
+                                                {
+                                                    <i class="fas fa-user-tie text-muted"></i>
+                                                    @Html.DisplayFor(modelItem => item.TeacherInCharge)
+                                                }
+                                                else
+                                                {
+                                                    <em class="text-muted">Not assigned</em>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(item.RoomNumber))
+                                                {
+                                                    <i class="fas fa-door-open text-muted"></i>
+                                                    @Html.DisplayFor(modelItem => item.RoomNumber)
+                                                }
+                                                else
+                                                {
+                                                    <em class="text-muted">Not set</em>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (item.Students.Count > 0)
+                                                {
+                                                    <a asp-action="Students" asp-route-id="@item.Id" 
+                                                       class="btn btn-sm btn-outline-info" title="View Students">
+                                                        <i class="fas fa-users"></i> @item.Students.Count
+                                                    </a>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge badge-light">0</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <small class="text-muted">@item.CreatedAt.ToString("MMM dd, yyyy")</small>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a asp-action="Details" asp-route-id="@item.Id" 
+                                                       class="btn btn-sm btn-outline-info" title="View Details">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <a asp-action="Edit" asp-route-id="@item.Id" 
+                                                       class="btn btn-sm btn-outline-warning" title="Edit">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <a asp-action="Delete" asp-route-id="@item.Id" 
+                                                       class="btn btn-sm btn-outline-danger" title="Delete">
+                                                        <i class="fas fa-trash"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- Empty State -->
+                        <div class="text-center py-5">
+                            <div class="mb-4">
+                                <i class="fas fa-chalkboard-teacher fa-5x text-muted"></i>
+                            </div>
+                            <h4 class="text-muted">No Classes Found</h4>
+                            <p class="text-muted">
+                                @if (!string.IsNullOrEmpty(ViewBag.CurrentFilter as string))
+                                {
+                                    <span>No classes match your search criteria.</span>
+                                }
+                                else
+                                {
+                                    <span>Start by creating your first class.</span>
+                                }
+                            </p>
+                            <a asp-action="Create" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Create First Class
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Alert Messages -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show position-fixed" style="top: 20px; right: 20px; z-index: 1050;" role="alert">
+        <i class="fas fa-check-circle"></i>
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show position-fixed" style="top: 20px; right: 20px; z-index: 1050;" role="alert">
+        <i class="fas fa-exclamation-circle"></i>
+        @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        // Auto hide alerts after 5 seconds
+        setTimeout(function() {
+            $('.alert').fadeOut('slow');
+        }, 5000);
+    </script>
+}

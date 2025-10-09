@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ReportDemo.Data;
 using ReportDemo.Models;
+using ReportDemo.Services;
 using AspNetCore.Reporting;
 using System.Data;
 
@@ -12,17 +13,65 @@ namespace ReportDemo.Controllers
     public class StudentsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IRollNumberService _rollNumberService;
 
-        public StudentsController(ApplicationDbContext context)
+        public StudentsController(ApplicationDbContext context, IRollNumberService rollNumberService)
         {
             _context = context;
+            _rollNumberService = rollNumberService;
         }
 
         // ------------------- Index ------------------- //
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchString, int? classId, string sortOrder)
         {
-            var students = await _context.Students.ToListAsync();
-            return View(students);
+            ViewBag.NameSortParm = string.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            ViewBag.ClassSortParm = sortOrder == "Class" ? "class_desc" : "Class";
+            ViewBag.AgeSortParm = sortOrder == "Age" ? "age_desc" : "Age";
+            ViewBag.CurrentFilter = searchString;
+            ViewBag.CurrentClassFilter = classId;
+
+            // Get classes for dropdown filter
+            ViewBag.Classes = await _context.Classes.OrderBy(c => c.ClassName).ThenBy(c => c.Section).ToListAsync();
+
+            var students = from s in _context.Students.Include(s => s.Class)
+                          select s;
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                students = students.Where(s => s.FirstName.Contains(searchString)
+                                             || s.LastName.Contains(searchString)
+                                             || s.RollNumber.Contains(searchString)
+                                             || s.Email.Contains(searchString));
+            }
+
+            if (classId.HasValue)
+            {
+                students = students.Where(s => s.ClassId == classId);
+            }
+
+            switch (sortOrder)
+            {
+                case "name_desc":
+                    students = students.OrderByDescending(s => s.FirstName).ThenByDescending(s => s.LastName);
+                    break;
+                case "Class":
+                    students = students.OrderBy(s => s.Class!.ClassName).ThenBy(s => s.Class!.Section);
+                    break;
+                case "class_desc":
+                    students = students.OrderByDescending(s => s.Class!.ClassName).ThenByDescending(s => s.Class!.Section);
+                    break;
+                case "Age":
+                    students = students.OrderBy(s => s.DateOfBirth);
+                    break;
+                case "age_desc":
+                    students = students.OrderByDescending(s => s.DateOfBirth);
+                    break;
+                default:
+                    students = students.OrderBy(s => s.FirstName).ThenBy(s => s.LastName);
+                    break;
+            }
+
+            return View(await students.AsNoTracking().ToListAsync());
         }
 
         // ------------------- Details ------------------- //
@@ -31,6 +80,7 @@ namespace ReportDemo.Controllers
             if (id == null) return NotFound();
 
             var student = await _context.Students
+                .Include(s => s.Class)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (student == null) return NotFound();
@@ -39,8 +89,9 @@ namespace ReportDemo.Controllers
         }
 
         // ------------------- Create ------------------- //
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            ViewBag.Classes = await _context.Classes.OrderBy(c => c.ClassName).ThenBy(c => c.Section).ToListAsync();
             return View();
         }
 
@@ -50,11 +101,17 @@ namespace ReportDemo.Controllers
         {
             if (ModelState.IsValid)
             {
+                // Generate auto roll number if not provided
+                if (string.IsNullOrEmpty(student.RollNumber))
+                {
+                    student.RollNumber = await _rollNumberService.GenerateRollNumberAsync(student.ClassId);
+                }
+                
                 // Convert all DateTime values to UTC for PostgreSQL compatibility
                 student.CreatedAt = DateTime.UtcNow;
                 student.UpdatedAt = DateTime.UtcNow;
                 
-                // Convert EnrollmentDate to UTC if it's not already
+                // Convert DateTime fields to UTC for PostgreSQL compatibility
                 if (student.EnrollmentDate.Kind == DateTimeKind.Unspecified)
                 {
                     student.EnrollmentDate = DateTime.SpecifyKind(student.EnrollmentDate, DateTimeKind.Utc);
@@ -64,10 +121,23 @@ namespace ReportDemo.Controllers
                     student.EnrollmentDate = student.EnrollmentDate.ToUniversalTime();
                 }
                 
+                if (student.DateOfBirth.Kind == DateTimeKind.Unspecified)
+                {
+                    student.DateOfBirth = DateTime.SpecifyKind(student.DateOfBirth, DateTimeKind.Utc);
+                }
+                else if (student.DateOfBirth.Kind == DateTimeKind.Local)
+                {
+                    student.DateOfBirth = student.DateOfBirth.ToUniversalTime();
+                }
+                
                 _context.Add(student);
                 await _context.SaveChangesAsync();
+                
+                TempData["SuccessMessage"] = $"Student {student.FullName} has been created successfully with Roll Number: {student.RollNumber}";
                 return RedirectToAction(nameof(Index));
             }
+            
+            ViewBag.Classes = await _context.Classes.OrderBy(c => c.ClassName).ThenBy(c => c.Section).ToListAsync();
             return View(student);
         }
 
@@ -79,6 +149,7 @@ namespace ReportDemo.Controllers
             var student = await _context.Students.FindAsync(id);
             if (student == null) return NotFound();
 
+            ViewBag.Classes = await _context.Classes.OrderBy(c => c.ClassName).ThenBy(c => c.Section).ToListAsync();
             return View(student);
         }
 
@@ -94,7 +165,7 @@ namespace ReportDemo.Controllers
                 {
                     student.UpdatedAt = DateTime.UtcNow;
                     
-                    // Convert EnrollmentDate to UTC if it's not already
+                    // Convert DateTime fields to UTC for PostgreSQL compatibility
                     if (student.EnrollmentDate.Kind == DateTimeKind.Unspecified)
                     {
                         student.EnrollmentDate = DateTime.SpecifyKind(student.EnrollmentDate, DateTimeKind.Utc);
@@ -104,8 +175,19 @@ namespace ReportDemo.Controllers
                         student.EnrollmentDate = student.EnrollmentDate.ToUniversalTime();
                     }
                     
+                    if (student.DateOfBirth.Kind == DateTimeKind.Unspecified)
+                    {
+                        student.DateOfBirth = DateTime.SpecifyKind(student.DateOfBirth, DateTimeKind.Utc);
+                    }
+                    else if (student.DateOfBirth.Kind == DateTimeKind.Local)
+                    {
+                        student.DateOfBirth = student.DateOfBirth.ToUniversalTime();
+                    }
+                    
                     _context.Update(student);
                     await _context.SaveChangesAsync();
+                    
+                    TempData["SuccessMessage"] = $"Student {student.FullName} has been updated successfully.";
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -116,6 +198,8 @@ namespace ReportDemo.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+            
+            ViewBag.Classes = await _context.Classes.OrderBy(c => c.ClassName).ThenBy(c => c.Section).ToListAsync();
             return View(student);
         }
 
@@ -125,6 +209,7 @@ namespace ReportDemo.Controllers
             if (id == null) return NotFound();
 
             var student = await _context.Students
+                .Include(s => s.Class)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (student == null) return NotFound();
@@ -139,8 +224,11 @@ namespace ReportDemo.Controllers
             var student = await _context.Students.FindAsync(id);
             if (student != null)
             {
+                var studentName = student.FullName;
                 _context.Students.Remove(student);
                 await _context.SaveChangesAsync();
+                
+                TempData["SuccessMessage"] = $"Student {studentName} has been deleted successfully.";
             }
             return RedirectToAction(nameof(Index));
         }
@@ -543,6 +631,21 @@ namespace ReportDemo.Controllers
 </html>";
 
             return Content(html, "text/html");
+        }
+
+        // ------------------- AJAX Methods ------------------- //
+        [HttpPost]
+        public async Task<JsonResult> GenerateRollNumber(int classId)
+        {
+            try
+            {
+                var rollNumber = await _rollNumberService.GenerateRollNumberAsync(classId);
+                return Json(new { success = true, rollNumber = rollNumber });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, error = ex.Message });
+            }
         }
     }
 }

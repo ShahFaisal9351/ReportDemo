@@ -1,0 +1,612 @@
+@model IEnumerable<ReportDemo.Models.Student>
+
+@{
+    ViewData["Title"] = "Manage Students by Class";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+}
+
+<style>
+    /* Professional Class Management Styles */
+    .class-management-container {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+    
+    .class-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 25px 30px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .class-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        animation: rotate 20s linear infinite;
+    }
+    
+    @@keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    .class-header-content {
+        position: relative;
+        z-index: 2;
+    }
+    
+    .class-selector {
+        background: #f8f9fa;
+        padding: 25px 30px;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .selector-row {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+    
+    .class-dropdown-container {
+        flex: 1;
+        min-width: 300px;
+    }
+    
+    .professional-select {
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        padding: 12px 16px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: white;
+        min-width: 100%;
+    }
+    
+    .professional-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        outline: none;
+    }
+    
+    .search-container {
+        flex: 1;
+        min-width: 250px;
+        position: relative;
+    }
+    
+    .search-input {
+        width: 100%;
+        padding: 12px 16px 12px 45px;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .search-input:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        outline: none;
+    }
+    
+    .search-icon {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+    }
+    
+    .stats-overview {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        padding: 25px 30px;
+        background: #f8f9fa;
+        margin: 0;
+    }
+    
+    .stat-card {
+        background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 3px 10px rgba(39, 174, 96, 0.3);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stat-card.primary {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        box-shadow: 0 3px 10px rgba(52, 152, 219, 0.3);
+    }
+    
+    .stat-card.warning {
+        background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+        box-shadow: 0 3px 10px rgba(243, 156, 18, 0.3);
+    }
+    
+    .stat-card.danger {
+        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        box-shadow: 0 3px 10px rgba(231, 76, 60, 0.3);
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 10px 0 5px 0;
+    }
+    
+    .stat-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        font-weight: 500;
+    }
+    
+    .students-table-container {
+        overflow-x: auto;
+        margin: 0;
+    }
+    
+    .professional-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0;
+        font-size: 0.95rem;
+    }
+    
+    .professional-table thead th {
+        background: #2c3e50;
+        color: white;
+        padding: 15px 20px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border: none;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+    
+    .professional-table thead th a {
+        color: white;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .professional-table thead th a:hover {
+        color: #f8f9fa;
+    }
+    
+    .professional-table tbody td {
+        padding: 15px 20px;
+        border-bottom: 1px solid #e9ecef;
+        vertical-align: middle;
+    }
+    
+    .professional-table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .student-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+    
+    .student-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    
+    .student-name {
+        font-weight: 600;
+        color: #2c3e50;
+        margin: 0;
+    }
+    
+    .student-roll {
+        color: #6c757d;
+        font-size: 0.85rem;
+    }
+    
+    .badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .badge-male {
+        background: #e3f2fd;
+        color: #1976d2;
+    }
+    
+    .badge-female {
+        background: #fce4ec;
+        color: #c2185b;
+    }
+    
+    .age-badge {
+        background: #f0f0f0;
+        color: #495057;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+    }
+    
+    .btn-sm {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+        border-radius: 6px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-outline-primary {
+        border: 1px solid #3498db;
+        color: #3498db;
+        background: white;
+    }
+    
+    .btn-outline-primary:hover {
+        background: #3498db;
+        color: white;
+    }
+    
+    .btn-outline-secondary {
+        border: 1px solid #6c757d;
+        color: #6c757d;
+        background: white;
+    }
+    
+    .btn-outline-secondary:hover {
+        background: #6c757d;
+        color: white;
+    }
+    
+    .no-students-message {
+        text-align: center;
+        padding: 60px 30px;
+        color: #6c757d;
+    }
+    
+    .no-students-icon {
+        font-size: 4rem;
+        color: #dee2e6;
+        margin-bottom: 20px;
+    }
+    
+    .select-class-message {
+        text-align: center;
+        padding: 80px 30px;
+        color: #6c757d;
+    }
+    
+    .select-class-icon {
+        font-size: 5rem;
+        color: #dee2e6;
+        margin-bottom: 30px;
+    }
+</style>
+
+<div class="class-management-container">
+    <div class="class-header">
+        <div class="class-header-content">
+            <h4 class="mb-0">
+                <i class="fas fa-users-cog me-2"></i>
+                Class-wise Student Management
+            </h4>
+            <p class="mb-0 mt-2">Select a class to view and manage its students</p>
+        </div>
+    </div>
+    
+    <div class="class-selector">
+        <form method="get" asp-action="ManageStudents">
+            <div class="selector-row">
+                <div class="class-dropdown-container">
+                    <label class="form-label fw-bold">
+                        <i class="fas fa-chalkboard-teacher me-1"></i>
+                        Select Class
+                    </label>
+                    <select name="classId" class="professional-select" onchange="this.form.submit()">
+                        <option value="">-- Select a Class --</option>
+                        @if (ViewBag.Classes != null)
+                        {
+                            @foreach (var classItem in (List<ReportDemo.Models.Class>)ViewBag.Classes)
+                            {
+                                <option value="@classItem.Id" 
+                                        selected="@(ViewBag.CurrentClassId != null && ViewBag.CurrentClassId.ToString() == classItem.Id.ToString())">
+                                    @classItem.DisplayName
+                                    @if (classItem.TeacherInCharge != null)
+                                    {
+                                        <text> - @classItem.TeacherInCharge</text>
+                                    }
+                                </option>
+                            }
+                        }
+                    </select>
+                </div>
+                
+                @if (ViewBag.CurrentClassId != null && ViewBag.CurrentClassId > 0)
+                {
+                    <div class="search-container">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-search me-1"></i>
+                            Search Students
+                        </label>
+                        <div style="position: relative;">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="search" name="searchString" value="@ViewBag.CurrentSearch" 
+                                   class="search-input" placeholder="Search by name, roll number, or email..." />
+                        </div>
+                    </div>
+                }
+            </div>
+            
+            @if (!string.IsNullOrEmpty(ViewBag.CurrentSearch as string))
+            {
+                <input type="hidden" name="classId" value="@ViewBag.CurrentClassId" />
+            }
+        </form>
+    </div>
+
+    @if (ViewBag.SelectedClass != null)
+    {
+        var selectedClass = (ReportDemo.Models.Class)ViewBag.SelectedClass;
+        
+        <!-- Class Statistics -->
+        <div class="stats-overview">
+            <div class="stat-card primary">
+                <div class="stat-value">@(ViewBag.TotalStudents ?? 0)</div>
+                <div class="stat-label">Total Students</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">@(ViewBag.MaleStudents ?? 0)</div>
+                <div class="stat-label">Male Students</div>
+            </div>
+            <div class="stat-card warning">
+                <div class="stat-value">@(ViewBag.FemaleStudents ?? 0)</div>
+                <div class="stat-label">Female Students</div>
+            </div>
+            <div class="stat-card danger">
+                <div class="stat-value">@((ViewBag.AverageAge ?? 0).ToString("F1"))</div>
+                <div class="stat-label">Average Age</div>
+            </div>
+        </div>
+        
+        <!-- Class Information -->
+        <div style="background: #fff3cd; padding: 20px 30px; border-left: 4px solid #ffc107;">
+            <h5 class="mb-2">
+                <i class="fas fa-info-circle text-warning me-2"></i>
+                @selectedClass.DisplayName
+            </h5>
+            <div class="row">
+                @if (!string.IsNullOrEmpty(selectedClass.TeacherInCharge))
+                {
+                    <div class="col-md-4">
+                        <strong>Teacher:</strong> @selectedClass.TeacherInCharge
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(selectedClass.RoomNumber))
+                {
+                    <div class="col-md-4">
+                        <strong>Room:</strong> @selectedClass.RoomNumber
+                    </div>
+                }
+                <div class="col-md-4">
+                    <strong>Total Students:</strong> @(ViewBag.TotalStudents ?? 0)
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Student Table -->
+    @if (ViewBag.CurrentClassId != null && ViewBag.CurrentClassId > 0)
+    {
+        if (Model != null && Model.Any())
+        {
+            <div class="students-table-container">
+                <table class="professional-table">
+                    <thead>
+                        <tr>
+                            <th>
+                                <a asp-action="ManageStudents" 
+                                   asp-route-classId="@ViewBag.CurrentClassId" 
+                                   asp-route-sortOrder="@ViewBag.NameSortParm"
+                                   asp-route-searchString="@ViewBag.CurrentSearch">
+                                    <i class="fas fa-user"></i>
+                                    Student
+                                    @if (ViewBag.NameSortParm == "name_desc")
+                                    {
+                                        <i class="fas fa-sort-down"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="fas fa-sort-up"></i>
+                                    }
+                                </a>
+                            </th>
+                            <th>
+                                <a asp-action="ManageStudents" 
+                                   asp-route-classId="@ViewBag.CurrentClassId" 
+                                   asp-route-sortOrder="@ViewBag.RollSortParm"
+                                   asp-route-searchString="@ViewBag.CurrentSearch">
+                                    <i class="fas fa-id-card"></i>
+                                    Roll Number
+                                    @if (ViewBag.RollSortParm == "roll_desc")
+                                    {
+                                        <i class="fas fa-sort-down"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="fas fa-sort-up"></i>
+                                    }
+                                </a>
+                            </th>
+                            <th>
+                                <i class="fas fa-venus-mars"></i>
+                                Gender
+                            </th>
+                            <th>
+                                <a asp-action="ManageStudents" 
+                                   asp-route-classId="@ViewBag.CurrentClassId" 
+                                   asp-route-sortOrder="@ViewBag.AgeSortParm"
+                                   asp-route-searchString="@ViewBag.CurrentSearch">
+                                    <i class="fas fa-birthday-cake"></i>
+                                    Age
+                                    @if (ViewBag.AgeSortParm == "age_desc")
+                                    {
+                                        <i class="fas fa-sort-down"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="fas fa-sort-up"></i>
+                                    }
+                                </a>
+                            </th>
+                            <th>
+                                <i class="fas fa-envelope"></i>
+                                Contact
+                            </th>
+                            <th>
+                                <i class="fas fa-cogs"></i>
+                                Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var student in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="student-info">
+                                        <div class="student-avatar">
+                                            @student.FirstName.Substring(0, 1).ToUpper()
+                                        </div>
+                                        <div>
+                                            <div class="student-name">@student.FullName</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="student-roll fw-bold">@student.RollNumber</span>
+                                </td>
+                                <td>
+                                    <span class="badge @(student.Gender.ToLower() == "male" ? "badge-male" : "badge-female")">
+                                        @student.Gender
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="age-badge">@student.Age years</span>
+                                </td>
+                                <td>
+                                    <div>
+                                        <small class="text-muted">@student.Email</small><br>
+                                        <small class="text-muted">@student.PhoneNumber</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <a asp-controller="Students" asp-action="Details" asp-route-id="@student.Id" 
+                                           class="btn-sm btn-outline-primary" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a asp-controller="Students" asp-action="Edit" asp-route-id="@student.Id" 
+                                           class="btn-sm btn-outline-secondary" title="Edit Student">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="no-students-message">
+                <i class="fas fa-user-slash no-students-icon"></i>
+                <h5>No Students Found</h5>
+                <p class="mb-0">
+                    @if (!string.IsNullOrEmpty(ViewBag.CurrentSearch as string))
+                    {
+                        <text>No students match your search criteria for "@ViewBag.CurrentSearch".</text>
+                    }
+                    else
+                    {
+                        <text>This class doesn't have any students enrolled yet.</text>
+                    }
+                </p>
+                <a asp-controller="Students" asp-action="Create" class="btn btn-primary mt-3">
+                    <i class="fas fa-plus me-2"></i>Add New Student
+                </a>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="select-class-message">
+            <i class="fas fa-chalkboard-teacher select-class-icon"></i>
+            <h4>Select a Class to Get Started</h4>
+            <p class="mb-0">Choose a class from the dropdown above to view and manage its students.</p>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Auto-submit search form on enter
+            $('.search-input').on('keypress', function(e) {
+                if (e.which === 13) {
+                    $(this).closest('form').submit();
+                }
+            });
+            
+            // Clear search functionality
+            $('.search-input').on('input', function() {
+                if ($(this).val() === '') {
+                    setTimeout(() => {
+                        $(this).closest('form').submit();
+                    }, 500);
+                }
+            });
+        });
+    </script>
+}

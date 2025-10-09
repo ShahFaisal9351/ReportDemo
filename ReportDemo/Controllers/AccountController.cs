@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using OfflineAuthDemo.Models;
+using ReportDemo.Models;
 using System.Threading.Tasks;
 
-namespace OfflineAuthDemo.Controllers
+namespace ReportDemo.Controllers
 {
     public class AccountController : Controller
     {
