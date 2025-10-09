@@ -1,0 +1,49 @@
+@using Microsoft.AspNetCore.Identity
+@{
+    ViewData["Title"] = "User Information";
+    Layout = "~/Views/Shared/_AuthLayout.cshtml";
+}
+
+<div class="text-center">
+    <h2><i class="fas fa-users me-2"></i>User Information (Debug)</h2>
+    
+    <div class="alert alert-info">
+        @ViewBag.Message
+    </div>
+    
+    @if (ViewBag.Users != null)
+    {
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Email</th>
+                        <th>Username</th>
+                        <th>Email Confirmed</th>
+                        <th>Lockout Enabled</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (IdentityUser user in ViewBag.Users)
+                    {
+                        <tr>
+                            <td>@user.Email</td>
+                            <td>@user.UserName</td>
+                            <td>@(user.EmailConfirmed ? "Yes" : "No")</td>
+                            <td>@(user.LockoutEnabled ? "Yes" : "No")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    
+    <div class="mt-4">
+        <a asp-action="Login" class="btn btn-primary me-2">
+            <i class="fas fa-sign-in-alt me-2"></i>Login
+        </a>
+        <a asp-action="Register" class="btn btn-secondary">
+            <i class="fas fa-user-plus me-2"></i>Register New User
+        </a>
+    </div>
+</div>

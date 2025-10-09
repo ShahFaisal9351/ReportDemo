@@ -1,50 +1,96 @@
 @model ReportDemo.Models.RegisterViewModel
 @{
     Layout = "~/Views/Shared/_AuthLayout.cshtml";
-    ViewData["Title"] = "Create account";
+    ViewData["Title"] = "Create Account";
 }
 
 <form asp-action="Register" method="post">
-    <div asp-validation-summary="All" class="text-warning small mb-3"></div>
+    <div asp-validation-summary="All" class="validation-summary"></div>
 
-    <div class="mb-3">
-        <label asp-for="Email" class="form-label">Email</label>
-        <input asp-for="Email" class="form-control auth-input" autocomplete="email" />
-        <span asp-validation-for="Email" class="text-warning small"></span>
+    <div class="mb-4">
+        <div class="input-group">
+            <span class="input-group-text bg-transparent border-0 pe-0">
+                <i class="fas fa-envelope text-muted"></i>
+            </span>
+            <div class="form-floating flex-fill">
+                <input asp-for="Email" class="form-control auth-input" placeholder="Enter your email address" autocomplete="email" />
+                <label asp-for="Email">Email Address</label>
+            </div>
+        </div>
+        <span asp-validation-for="Email" class="text-danger"></span>
     </div>
 
-    <div class="mb-3">
-        <div class="d-flex justify-content-between align-items-center">
-            <label asp-for="Password" class="form-label mb-0">Password</label>
-            <small id="pwStrength" class="text-white-50">Strength: –</small>
+    <div class="mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="text-muted">
+                <i class="fas fa-lock me-1"></i>
+                Password Strength:
+            </span>
+            <small id="pwStrength" class="badge bg-secondary">Not Set</small>
         </div>
         <div class="input-group">
-            <input asp-for="Password" class="form-control auth-input" id="pw" autocomplete="new-password" />
-            <button class="btn btn-outline-light" type="button" id="togglePw">Show</button>
+            <span class="input-group-text bg-transparent border-0 pe-0">
+                <i class="fas fa-key text-muted"></i>
+            </span>
+            <div class="form-floating flex-fill">
+                <input asp-for="Password" class="form-control auth-input" id="pw" placeholder="Create a strong password" autocomplete="new-password" />
+                <label asp-for="Password">Password</label>
+            </div>
+            <button class="btn btn-outline-secondary border-0" type="button" id="togglePw" tabindex="-1">
+                <i class="fas fa-eye"></i>
+            </button>
         </div>
-        <span asp-validation-for="Password" class="text-warning small"></span>
+        <div class="mt-2">
+            <div id="pwProgress" class="progress" style="height: 4px;">
+                <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+            </div>
+        </div>
+        <span asp-validation-for="Password" class="text-danger"></span>
     </div>
 
-    <div class="mb-3">
-        <label asp-for="ConfirmPassword" class="form-label">Confirm password</label>
+    <div class="mb-4">
         <div class="input-group">
-            <input asp-for="ConfirmPassword" class="form-control auth-input" id="cpw" autocomplete="new-password" />
-            <button class="btn btn-outline-light" type="button" id="toggleCpw">Show</button>
+            <span class="input-group-text bg-transparent border-0 pe-0">
+                <i class="fas fa-shield-alt text-muted"></i>
+            </span>
+            <div class="form-floating flex-fill">
+                <input asp-for="ConfirmPassword" class="form-control auth-input" id="cpw" placeholder="Re-enter your password" autocomplete="new-password" />
+                <label asp-for="ConfirmPassword">Confirm Password</label>
+            </div>
+            <button class="btn btn-outline-secondary border-0" type="button" id="toggleCpw" tabindex="-1">
+                <i class="fas fa-eye"></i>
+            </button>
         </div>
-        <span asp-validation-for="ConfirmPassword" class="text-warning small"></span>
+        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
     </div>
 
-    <div class="form-check mb-3">
+    <div class="form-check mb-4">
         <input class="form-check-input" type="checkbox" id="terms" required />
-        <label class="form-check-label" for="terms">I agree to the Terms and Privacy Policy</label>
+        <label class="form-check-label" for="terms">
+            I agree to the <a href="#" class="auth-link">Terms of Service</a> and <a href="#" class="auth-link">Privacy Policy</a>
+        </label>
     </div>
 
-    <div class="d-grid">
-        <button type="submit" class="btn btn-lg auth-btn">Create account</button>
+    <div class="d-grid mb-4">
+        <button type="submit" class="btn btn-lg auth-btn" id="submitBtn">
+            <i class="fas fa-user-plus me-2"></i>
+            Create My Account
+        </button>
     </div>
-    <div class="mt-3 text-center">
-        <span class="text-white-50">Already have an account?</span>
-        <a asp-controller="Account" asp-action="Login" class="link-light text-decoration-none">Sign in</a>
+    
+    <div class="text-center">
+        <p class="text-muted mb-3">Already have an account?</p>
+        <a asp-controller="Account" asp-action="Login" class="auth-link">
+            <i class="fas fa-sign-in-alt me-2"></i>
+            Sign In Instead
+        </a>
+    </div>
+    
+    <div class="text-center mt-4">
+        <small class="text-muted">
+            <i class="fas fa-lock me-1"></i>
+            Your data is encrypted and secure
+        </small>
     </div>
 </form>
 
@@ -57,32 +103,110 @@
             const togglePw = document.getElementById('togglePw');
             const toggleCpw = document.getElementById('toggleCpw');
             const meter = document.getElementById('pwStrength');
+            const progress = document.querySelector('#pwProgress .progress-bar');
+            const form = document.querySelector('form');
+            const submitBtn = document.getElementById('submitBtn');
+
+            const strengthLevels = [
+                { text: 'Very Weak', class: 'bg-danger', width: '20%' },
+                { text: 'Weak', class: 'bg-warning', width: '40%' },
+                { text: 'Fair', class: 'bg-info', width: '60%' },
+                { text: 'Good', class: 'bg-primary', width: '80%' },
+                { text: 'Strong', class: 'bg-success', width: '100%' }
+            ];
 
             function updateStrength(value) {
                 let score = 0;
-                if (!value) return '–';
+                if (!value) {
+                    meter.textContent = 'Not Set';
+                    meter.className = 'badge bg-secondary';
+                    progress.style.width = '0%';
+                    progress.className = 'progress-bar';
+                    return;
+                }
+                
                 if (value.length >= 8) score++;
                 if (/[A-Z]/.test(value)) score++;
                 if (/[a-z]/.test(value)) score++;
                 if (/\d/.test(value)) score++;
                 if (/[^A-Za-z0-9]/.test(value)) score++;
-                return ['Very weak','Weak','Okay','Good','Strong'][Math.min(score-1, 4)] || 'Very weak';
+                
+                const level = Math.min(score - 1, 4);
+                const strength = strengthLevels[level] || strengthLevels[0];
+                
+                meter.textContent = strength.text;
+                meter.className = `badge ${strength.class.replace('bg-', 'bg-')}`;
+                progress.style.width = strength.width;
+                progress.className = `progress-bar ${strength.class}`;
             }
 
-            pw && pw.addEventListener('input', function () {
-                meter.textContent = 'Strength: ' + updateStrength(pw.value);
-            });
-
-            function bindToggle(input, btn) {
+            function togglePasswordVisibility(input, btn) {
                 if (!input || !btn) return;
+                
                 btn.addEventListener('click', function () {
-                    const next = input.type === 'password' ? 'text' : 'password';
-                    input.type = next;
-                    btn.textContent = next === 'password' ? 'Show' : 'Hide';
+                    const icon = btn.querySelector('i');
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        icon.classList.remove('fa-eye');
+                        icon.classList.add('fa-eye-slash');
+                    } else {
+                        input.type = 'password';
+                        icon.classList.remove('fa-eye-slash');
+                        icon.classList.add('fa-eye');
+                    }
                 });
             }
-            bindToggle(pw, togglePw);
-            bindToggle(cpw, toggleCpw);
+            
+            function validatePasswordMatch() {
+                if (cpw.value && pw.value !== cpw.value) {
+                    cpw.setCustomValidity('Passwords do not match');
+                    cpw.parentElement.parentElement.classList.add('is-invalid');
+                } else {
+                    cpw.setCustomValidity('');
+                    cpw.parentElement.parentElement.classList.remove('is-invalid');
+                }
+            }
+
+            // Event listeners
+            if (pw) {
+                pw.addEventListener('input', function () {
+                    updateStrength(pw.value);
+                    if (cpw.value) validatePasswordMatch();
+                });
+            }
+            
+            if (cpw) {
+                cpw.addEventListener('input', validatePasswordMatch);
+            }
+            
+            // Password toggle functionality
+            togglePasswordVisibility(pw, togglePw);
+            togglePasswordVisibility(cpw, toggleCpw);
+            
+            // Form submission
+            if (form && submitBtn) {
+                form.addEventListener('submit', function() {
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creating Account...';
+                    submitBtn.disabled = true;
+                });
+            }
+            
+            // Input focus effects
+            const inputs = form.querySelectorAll('.auth-input');
+            inputs.forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.parentElement.classList.add('focused');
+                });
+                
+                input.addEventListener('blur', function() {
+                    this.parentElement.classList.remove('focused');
+                    if (this.value.trim() !== '') {
+                        this.classList.add('has-value');
+                    } else {
+                        this.classList.remove('has-value');
+                    }
+                });
+            });
         })();
     </script>
 }

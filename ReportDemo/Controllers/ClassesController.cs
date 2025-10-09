@@ -351,6 +351,84 @@ namespace ReportDemo.Controllers
             return Json(new { canPromote, academicYear = currentAcademicYear });
         }
 
+        // GET: Classes/BulkPromote/5 - Promote all students in class after exam completion
+        public async Task<IActionResult> BulkPromote(int? id)
+        {
+            if (id == null) return NotFound();
+
+            var @class = await _context.Classes
+                .Include(c => c.Students)
+                .FirstOrDefaultAsync(c => c.Id == id);
+
+            if (@class == null) return NotFound();
+
+            var currentAcademicYear = GetCurrentAcademicYear();
+            var canPromote = await _promotionService.CanPromoteClassAsync(id.Value, currentAcademicYear, "Final");
+            var nextClass = await _promotionService.GetNextClassAsync(id.Value);
+            var isMatricClass = await _promotionService.IsMatricClassAsync(id.Value);
+
+            // Get exam results for this class
+            var examResults = await _context.ExamResults
+                .Include(e => e.Student)
+                .Where(e => e.ClassId == id && e.AcademicYear == currentAcademicYear && e.Term == "Final")
+                .ToListAsync();
+
+            ViewBag.CanPromote = canPromote;
+            ViewBag.NextClass = nextClass;
+            ViewBag.IsMatricClass = isMatricClass;
+            ViewBag.AcademicYear = currentAcademicYear;
+            ViewBag.ExamResults = examResults;
+            ViewBag.CurrentClass = @class;
+
+            // Calculate promotion statistics
+            var totalStudents = @class.Students.Count;
+            var studentsWithResults = examResults.Count;
+            var passedStudents = examResults.Count(e => e.IsPassed);
+            var failedStudents = examResults.Count(e => !e.IsPassed);
+
+            ViewBag.TotalStudents = totalStudents;
+            ViewBag.StudentsWithResults = studentsWithResults;
+            ViewBag.PassedStudents = passedStudents;
+            ViewBag.FailedStudents = failedStudents;
+            ViewBag.StudentsWithoutResults = totalStudents - studentsWithResults;
+
+            return View(@class);
+        }
+
+        // POST: Classes/BulkPromote/5 - Execute bulk promotion
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> BulkPromote(int id, string academicYear, bool confirmPromotion = false)
+        {
+            if (!confirmPromotion)
+            {
+                TempData["ErrorMessage"] = "Please confirm the promotion by checking the confirmation box.";
+                return RedirectToAction(nameof(BulkPromote), new { id });
+            }
+
+            var @class = await _context.Classes.FindAsync(id);
+            if (@class == null) return NotFound();
+
+            var promotedBy = User?.Identity?.Name ?? "System";
+            var result = await _promotionService.PromoteStudentsAsync(id, academicYear, promotedBy);
+
+            if (result.Success)
+            {
+                var message = string.Join(" ", result.Messages);
+                if (result.GraduatedCount > 0)
+                {
+                    message += $" 🎓 {result.GraduatedCount} students graduated!";
+                }
+                TempData["SuccessMessage"] = message;
+            }
+            else
+            {
+                TempData["ErrorMessage"] = string.Join(" ", result.Messages);
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
         // GET: Classes/ManageStudents - Class-wise student management
         public async Task<IActionResult> ManageStudents(int? classId, string searchString, string sortOrder)
         {

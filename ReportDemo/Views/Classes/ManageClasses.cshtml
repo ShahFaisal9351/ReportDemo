@@ -88,19 +88,26 @@
     
     .action-buttons {
         margin-top: 20px;
-        display: flex;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
         gap: 8px;
-        flex-wrap: wrap;
+        margin-bottom: 10px;
+    }
+    
+    .action-buttons .btn-group {
+        grid-column: 1 / -1;
+        display: flex;
+        justify-content: space-between;
+        margin-top: 8px;
     }
     
     .btn-action {
-        flex: 1;
-        min-width: 0;
         font-size: 0.85rem;
         padding: 8px 12px;
         border-radius: 8px;
         font-weight: 500;
         transition: all 0.3s ease;
+        text-align: center;
     }
     
     .btn-promote {
@@ -189,11 +196,17 @@
     
     @@media (max-width: 768px) {
         .action-buttons {
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+        
+        .action-buttons .btn-group {
+            grid-column: 1;
             flex-direction: column;
+            gap: 8px;
         }
         
         .btn-action {
-            flex: none;
             width: 100%;
         }
         
@@ -314,6 +327,10 @@
                                 <a href="@Url.Action("Students", new { id = classItem.Id })" 
                                    class="btn btn-info btn-action" title="View Students">
                                     <i class="fas fa-users"></i> Students
+                                </a>
+                                <a href="@Url.Action("ExamStatus", "Classes", new { id = classItem.Id })" 
+                                   class="btn btn-warning btn-action" title="View Exam Status">
+                                    <i class="fas fa-clipboard-check"></i> Exams
                                 </a>
                                 <button type="button" class="btn btn-promote btn-action" 
                                         onclick="checkPromotionStatus(@classItem.Id)" 
@@ -471,48 +488,29 @@
         function checkPromotionStatus(classId) {
             selectedClassId = classId;
             
-            fetch(`/Classes/PromotionStatus/${classId}`)
+            // First check if exams are complete, then redirect to detailed promotion view
+            fetch(`/Exam/ExamStatus/${classId}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.canPromote) {
-                        $('#promotionMessage').text(`Are you sure you want to promote all students in this class for academic year ${data.academicYear}?`);
-                        $('#promotionModal').modal('show');
+                        // Redirect to the detailed promotion page
+                        window.location.href = `/Classes/BulkPromote/${classId}`;
                     } else {
-                        showToast('Cannot promote this class yet. Ensure all students have completed their exams.', 'warning');
+                        const message = data.message || 'Cannot promote this class yet. Please ensure all students have completed their exams.';
+                        showToast(message, 'warning');
                     }
                 })
                 .catch(error => {
                     console.error('Error checking promotion status:', error);
-                    showToast('Error checking promotion status. Please try again.', 'error');
+                    // If API fails, redirect to exam status page where they can see details
+                    window.location.href = `/Classes/ExamStatus/${classId}`;
                 });
         }
 
+        // Promotion confirmation is now handled in the BulkPromote page
+        // This event handler is kept for potential future use
         $('#confirmPromotionBtn').click(function() {
-            if (selectedClassId) {
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = `/Classes/Promote/${selectedClassId}`;
-                
-                const token = document.querySelector('input[name="__RequestVerificationToken"]');
-                if (token) {
-                    const tokenInput = document.createElement('input');
-                    tokenInput.type = 'hidden';
-                    tokenInput.name = '__RequestVerificationToken';
-                    tokenInput.value = token.value;
-                    form.appendChild(tokenInput);
-                }
-                
-                const academicYearInput = document.createElement('input');
-                academicYearInput.type = 'hidden';
-                academicYearInput.name = 'academicYear';
-                academicYearInput.value = getCurrentAcademicYear();
-                form.appendChild(academicYearInput);
-                
-                document.body.appendChild(form);
-                form.submit();
-                
-                $('#promotionModal').modal('hide');
-            }
+            $('#promotionModal').modal('hide');
         });
 
         function getCurrentAcademicYear() {

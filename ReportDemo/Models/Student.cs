@@ -34,6 +34,16 @@ namespace ReportDemo.Models
         [Display(Name = "Roll Number")]
         public string RollNumber { get; set; } = string.Empty;
 
+        [Required(ErrorMessage = "Admission number is required")]
+        [StringLength(30, ErrorMessage = "Admission number cannot exceed 30 characters")]
+        [Display(Name = "Admission Number")]
+        public string AdmissionNumber { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Section is required")]
+        [StringLength(5, ErrorMessage = "Section cannot exceed 5 characters")]
+        [RegularExpression(@"^[A-Z]$", ErrorMessage = "Section must be a single uppercase letter (A-Z)")]
+        public string Section { get; set; } = string.Empty;
+
         // Foreign key for Class relationship
         [Required(ErrorMessage = "Class is required")]
         [Display(Name = "Class")]
@@ -76,17 +86,30 @@ namespace ReportDemo.Models
         [StringLength(50, ErrorMessage = "Country cannot exceed 50 characters")]
         public string Country { get; set; } = string.Empty;
 
-        // Guardian Information
-        [Required(ErrorMessage = "Guardian name is required")]
-        [StringLength(100, ErrorMessage = "Guardian name cannot exceed 100 characters")]
-        [Display(Name = "Guardian Name")]
+        // Parent/Guardian Information
+        [Required(ErrorMessage = "Parent/Guardian name is required")]
+        [StringLength(100, ErrorMessage = "Parent/Guardian name cannot exceed 100 characters")]
+        [Display(Name = "Parent/Guardian Name")]
         public string GuardianName { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Guardian contact is required")]
-        [Phone(ErrorMessage = "Invalid guardian contact format")]
-        [StringLength(20, ErrorMessage = "Guardian contact cannot exceed 20 characters")]
-        [Display(Name = "Guardian Contact")]
+        [Required(ErrorMessage = "Parent/Guardian contact is required")]
+        [Phone(ErrorMessage = "Invalid parent/guardian contact format")]
+        [StringLength(20, ErrorMessage = "Parent/Guardian contact cannot exceed 20 characters")]
+        [Display(Name = "Parent/Guardian Contact")]
         public string GuardianContact { get; set; } = string.Empty;
+
+        [StringLength(100, ErrorMessage = "Father name cannot exceed 100 characters")]
+        [Display(Name = "Father Name")]
+        public string? FatherName { get; set; }
+
+        [StringLength(100, ErrorMessage = "Mother name cannot exceed 100 characters")]
+        [Display(Name = "Mother Name")]
+        public string? MotherName { get; set; }
+
+        [Phone(ErrorMessage = "Invalid emergency contact format")]
+        [StringLength(20, ErrorMessage = "Emergency contact cannot exceed 20 characters")]
+        [Display(Name = "Emergency Contact")]
+        public string? EmergencyContact { get; set; }
 
         // Profile Information
         [StringLength(255, ErrorMessage = "Profile image path cannot exceed 255 characters")]

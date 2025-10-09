@@ -1,0 +1,413 @@
+@model List<ReportDemo.Models.Student>
+
+@{
+    ViewData["Title"] = $"Exam Status - {ViewBag.Class.DisplayName}";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+}
+
+<style>
+    .exam-status-container {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+    
+    .exam-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 25px 30px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .exam-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        animation: rotate 20s linear infinite;
+    }
+    
+    @@keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    .exam-header-content {
+        position: relative;
+        z-index: 2;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        padding: 25px 30px;
+        background: #f8f9fa;
+    }
+    
+    .stat-card {
+        background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 3px 10px rgba(39, 174, 96, 0.3);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stat-card.primary {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        box-shadow: 0 3px 10px rgba(52, 152, 219, 0.3);
+    }
+    
+    .stat-card.warning {
+        background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+        box-shadow: 0 3px 10px rgba(243, 156, 18, 0.3);
+    }
+    
+    .stat-card.danger {
+        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        box-shadow: 0 3px 10px rgba(231, 76, 60, 0.3);
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 10px 0 5px 0;
+    }
+    
+    .stat-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        font-weight: 500;
+    }
+    
+    .action-buttons {
+        padding: 25px 30px;
+        background: #fff;
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        justify-content: center;
+        border-top: 1px solid #e9ecef;
+    }
+    
+    .professional-btn {
+        padding: 12px 25px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 500;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+        cursor: pointer;
+    }
+    
+    .btn-primary-prof {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        color: white;
+    }
+    
+    .btn-primary-prof:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(52, 152, 219, 0.4);
+        color: white;
+    }
+    
+    .btn-success-prof {
+        background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+        color: white;
+    }
+    
+    .btn-success-prof:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(39, 174, 96, 0.4);
+        color: white;
+    }
+    
+    .btn-promote {
+        background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+        color: white;
+        animation: glow 2s ease-in-out infinite alternate;
+    }
+    
+    @@keyframes glow {
+        from { box-shadow: 0 0 10px rgba(155, 89, 182, 0.5); }
+        to { box-shadow: 0 0 20px rgba(155, 89, 182, 0.8), 0 0 30px rgba(155, 89, 182, 0.6); }
+    }
+    
+    .students-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0;
+    }
+    
+    .students-table thead th {
+        background: #2c3e50;
+        color: white;
+        padding: 15px 20px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border: none;
+    }
+    
+    .students-table tbody td {
+        padding: 15px 20px;
+        border-bottom: 1px solid #e9ecef;
+        vertical-align: middle;
+    }
+    
+    .students-table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .grade-badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .grade-a-plus { background: #d4edda; color: #155724; }
+    .grade-a { background: #d1ecf1; color: #0c5460; }
+    .grade-b { background: #fff3cd; color: #856404; }
+    .grade-c { background: #f8d7da; color: #721c24; }
+    .grade-d { background: #f5c6cb; color: #721c24; }
+    .grade-f { background: #f8d7da; color: #721c24; }
+    
+    .status-badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-weight: 500;
+        font-size: 0.8rem;
+    }
+    
+    .status-completed { background: #d4edda; color: #155724; }
+    .status-pending { background: #fff3cd; color: #856404; }
+    
+    .action-btn {
+        padding: 6px 12px;
+        border: none;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 0.8rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    
+    .btn-record {
+        background: #e8f4f8;
+        color: #2980b9;
+    }
+    
+    .btn-record:hover {
+        background: #3498db;
+        color: white;
+        transform: translateY(-1px);
+    }
+    
+    .promotion-ready {
+        background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        margin: 20px 30px;
+        box-shadow: 0 5px 15px rgba(39, 174, 96, 0.3);
+    }
+    
+    .promotion-ready h4 {
+        margin: 0 0 10px 0;
+        font-size: 1.2rem;
+    }
+</style>
+
+<div class="exam-status-container">
+    <div class="exam-header">
+        <div class="exam-header-content">
+            <h4 class="mb-0">
+                <i class="fas fa-clipboard-list me-2"></i>
+                Exam Status - @ViewBag.Class.DisplayName
+            </h4>
+            <p class="mb-0 mt-2">Academic Year: @ViewBag.AcademicYear</p>
+        </div>
+    </div>
+    
+    <!-- Statistics -->
+    <div class="stats-grid">
+        <div class="stat-card primary">
+            <div class="stat-value">@ViewBag.TotalStudents</div>
+            <div class="stat-label">Total Students</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">@ViewBag.StudentsWithResults</div>
+            <div class="stat-label">Results Recorded</div>
+        </div>
+        <div class="stat-card warning">
+            <div class="stat-value">@ViewBag.PassedStudents</div>
+            <div class="stat-label">Students Passed</div>
+        </div>
+        <div class="stat-card danger">
+            <div class="stat-value">@(ViewBag.StudentsWithResults - ViewBag.PassedStudents)</div>
+            <div class="stat-label">Students Failed</div>
+        </div>
+    </div>
+    
+    <!-- Promotion Status -->
+    @if (ViewBag.CanPromote)
+    {
+        <div class="promotion-ready">
+            <h4>🎉 Class Ready for Promotion!</h4>
+            <p class="mb-0">All students have completed their exams. You can now promote the class to the next level.</p>
+        </div>
+    }
+    
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <a asp-controller="Exam" asp-action="BulkRecordResults" asp-route-classId="@ViewBag.Class.Id" 
+           class="professional-btn btn-primary-prof">
+            <i class="fas fa-edit"></i>
+            Record All Results
+        </a>
+        
+        @if (ViewBag.CanPromote)
+        {
+            <a asp-controller="Classes" asp-action="BulkPromote" asp-route-id="@ViewBag.Class.Id" 
+               class="professional-btn btn-promote">
+                <i class="fas fa-graduation-cap"></i>
+                Promote Class
+            </a>
+        }
+        
+        <a asp-controller="Classes" asp-action="Details" asp-route-id="@ViewBag.Class.Id" 
+           class="professional-btn btn-success-prof">
+            <i class="fas fa-arrow-left"></i>
+            Back to Class
+        </a>
+    </div>
+    
+    <!-- Students Table -->
+    <div style="overflow-x: auto;">
+        <table class="students-table">
+            <thead>
+                <tr>
+                    <th>Roll Number</th>
+                    <th>Student Name</th>
+                    <th>Exam Status</th>
+                    <th>Percentage</th>
+                    <th>Grade</th>
+                    <th>Pass/Fail</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var student in Model.OrderBy(s => s.RollNumber))
+                {
+                    var examResult = ((List<ReportDemo.Models.ExamResult>)ViewBag.ExamResults)
+                        .FirstOrDefault(e => e.StudentId == student.Id);
+                    
+                    <tr>
+                        <td>
+                            <strong class="text-primary">@student.RollNumber</strong>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="student-avatar me-3" style="width: 35px; height: 35px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                                    @student.FirstName.Substring(0, 1).ToUpper()
+                                </div>
+                                <div>
+                                    <strong>@student.FullName</strong>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            @if (examResult != null)
+                            {
+                                <span class="status-badge status-completed">
+                                    <i class="fas fa-check-circle me-1"></i>Completed
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="status-badge status-pending">
+                                    <i class="fas fa-clock me-1"></i>Pending
+                                </span>
+                            }
+                        </td>
+                        <td>
+                            @if (examResult != null)
+                            {
+                                <strong>@examResult.Percentage%</strong>
+                            }
+                            else
+                            {
+                                <span class="text-muted">-</span>
+                            }
+                        </td>
+                        <td>
+                            @if (examResult != null)
+                            {
+                                <span class="grade-badge grade-@examResult.Grade.ToLower().Replace("+", "-plus")">
+                                    @examResult.Grade
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">-</span>
+                            }
+                        </td>
+                        <td>
+                            @if (examResult != null)
+                            {
+                                if (examResult.IsPassed)
+                                {
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-check me-1"></i>PASS
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">
+                                        <i class="fas fa-times me-1"></i>FAIL
+                                    </span>
+                                }
+                            }
+                            else
+                            {
+                                <span class="text-muted">-</span>
+                            }
+                        </td>
+                        <td>
+                            <a asp-controller="Exam" asp-action="RecordResult" 
+                               asp-route-studentId="@student.Id" 
+                               asp-route-classId="@ViewBag.Class.Id" 
+                               class="action-btn btn-record">
+                                <i class="fas fa-edit"></i>
+                                @(examResult != null ? "Edit" : "Record")
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

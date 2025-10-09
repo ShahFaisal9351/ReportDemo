@@ -302,6 +302,20 @@
                 </div>
                 <div class="col-md-6">
                     <div class="professional-input-group">
+                        <label asp-for="AdmissionNumber" class="professional-label">
+                            <i class="fas fa-certificate input-icon"></i>
+                            Admission Number
+                        </label>
+                        <input asp-for="AdmissionNumber" class="form-control professional-input" 
+                               placeholder="Enter admission number" />
+                        <span asp-validation-for="AdmissionNumber" class="validation-error"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="professional-input-group">
                         <label asp-for="ClassId" class="professional-label">
                             <i class="fas fa-chalkboard input-icon"></i>
                             Class
@@ -317,6 +331,23 @@
                             }
                         </select>
                         <span asp-validation-for="ClassId" class="validation-error"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="professional-input-group">
+                        <label asp-for="Section" class="professional-label">
+                            <i class="fas fa-layer-group input-icon"></i>
+                            Section
+                        </label>
+                        <select asp-for="Section" class="form-control professional-input">
+                            <option value="">Select Section</option>
+                            <option value="A">Section A</option>
+                            <option value="B">Section B</option>
+                            <option value="C">Section C</option>
+                            <option value="D">Section D</option>
+                            <option value="E">Section E</option>
+                        </select>
+                        <span asp-validation-for="Section" class="validation-error"></span>
                     </div>
                 </div>
             </div>
@@ -425,10 +456,10 @@
                     <div class="professional-input-group">
                         <label asp-for="GuardianName" class="professional-label">
                             <i class="fas fa-user-shield input-icon"></i>
-                            Guardian Name
+                            Primary Guardian Name
                         </label>
                         <input asp-for="GuardianName" class="form-control professional-input" 
-                               placeholder="Enter guardian's full name" />
+                               placeholder="Enter primary guardian's full name" />
                         <span asp-validation-for="GuardianName" class="validation-error"></span>
                     </div>
                 </div>
@@ -443,6 +474,41 @@
                         <span asp-validation-for="GuardianContact" class="validation-error"></span>
                     </div>
                 </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="professional-input-group">
+                        <label asp-for="FatherName" class="professional-label">
+                            <i class="fas fa-male input-icon"></i>
+                            Father Name (Optional)
+                        </label>
+                        <input asp-for="FatherName" class="form-control professional-input" 
+                               placeholder="Enter father's name" />
+                        <span asp-validation-for="FatherName" class="validation-error"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="professional-input-group">
+                        <label asp-for="MotherName" class="professional-label">
+                            <i class="fas fa-female input-icon"></i>
+                            Mother Name (Optional)
+                        </label>
+                        <input asp-for="MotherName" class="form-control professional-input" 
+                               placeholder="Enter mother's name" />
+                        <span asp-validation-for="MotherName" class="validation-error"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="professional-input-group">
+                <label asp-for="EmergencyContact" class="professional-label">
+                    <i class="fas fa-exclamation-triangle input-icon"></i>
+                    Emergency Contact (Optional)
+                </label>
+                <input asp-for="EmergencyContact" class="form-control professional-input" 
+                       placeholder="Enter emergency contact number" type="tel" />
+                <span asp-validation-for="EmergencyContact" class="validation-error"></span>
             </div>
 
             <div class="form-actions">

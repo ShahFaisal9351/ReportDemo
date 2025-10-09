@@ -300,7 +300,14 @@
             <div class="sidebar-menu-title">Main Menu</div>
             
             <div class="sidebar-menu-item">
-                <a asp-controller="Students" asp-action="Index" class="sidebar-menu-link active">
+                <a asp-controller="Home" asp-action="Index" class="sidebar-menu-link">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+            </div>
+            
+            <div class="sidebar-menu-item">
+                <a asp-controller="Students" asp-action="Index" class="sidebar-menu-link">
                     <i class="fas fa-users"></i>
                     <span>Student Management</span>
                 </a>
@@ -333,6 +340,15 @@
                 <a asp-controller="Classes" asp-action="Create" class="sidebar-menu-link">
                     <i class="fas fa-plus-circle"></i>
                     <span>Add New Class</span>
+                </a>
+            </div>
+            
+            <div class="sidebar-menu-title">Exam & Promotion</div>
+            
+            <div class="sidebar-menu-item">
+                <a asp-controller="Exam" asp-action="Index" class="sidebar-menu-link">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span>Exam Results</span>
                 </a>
             </div>
             

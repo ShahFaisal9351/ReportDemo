@@ -22,13 +22,19 @@ namespace ReportDemo.Controllers
         }
 
         // ------------------- Index ------------------- //
-        public async Task<IActionResult> Index(string searchString, int? classId, string sortOrder)
+        public async Task<IActionResult> Index(string searchString, int? classId, string sortOrder, int? pageNumber, int? pageSize)
         {
             ViewBag.NameSortParm = string.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
             ViewBag.ClassSortParm = sortOrder == "Class" ? "class_desc" : "Class";
             ViewBag.AgeSortParm = sortOrder == "Age" ? "age_desc" : "Age";
             ViewBag.CurrentFilter = searchString;
             ViewBag.CurrentClassFilter = classId;
+            
+            // Pagination settings
+            int currentPageSize = pageSize ?? 10; // Default 10 per page
+            int currentPageNumber = pageNumber ?? 1;
+            ViewBag.CurrentPageSize = currentPageSize;
+            ViewBag.PageSizeOptions = new List<int> { 5, 10, 25, 50, 100 };
 
             // Get classes for dropdown filter
             ViewBag.Classes = await _context.Classes.OrderBy(c => c.ClassName).ThenBy(c => c.Section).ToListAsync();
@@ -41,7 +47,12 @@ namespace ReportDemo.Controllers
                 students = students.Where(s => s.FirstName.Contains(searchString)
                                              || s.LastName.Contains(searchString)
                                              || s.RollNumber.Contains(searchString)
-                                             || s.Email.Contains(searchString));
+                                             || s.AdmissionNumber.Contains(searchString)
+                                             || s.Email.Contains(searchString)
+                                             || s.PhoneNumber.Contains(searchString)
+                                             || s.GuardianName.Contains(searchString)
+                                             || (s.FatherName != null && s.FatherName.Contains(searchString))
+                                             || (s.MotherName != null && s.MotherName.Contains(searchString)));
             }
 
             if (classId.HasValue)
@@ -71,7 +82,20 @@ namespace ReportDemo.Controllers
                     break;
             }
 
-            return View(await students.AsNoTracking().ToListAsync());
+            // Get total count for pagination
+            var totalCount = await students.CountAsync();
+            ViewBag.TotalCount = totalCount;
+            ViewBag.TotalPages = (int)Math.Ceiling(totalCount / (double)currentPageSize);
+            ViewBag.CurrentPage = currentPageNumber;
+            
+            // Apply pagination
+            var pagedStudents = await students
+                .Skip((currentPageNumber - 1) * currentPageSize)
+                .Take(currentPageSize)
+                .AsNoTracking()
+                .ToListAsync();
+            
+            return View(pagedStudents);
         }
 
         // ------------------- Details ------------------- //

@@ -1,0 +1,432 @@
+@model ReportDemo.Models.Class
+
+@{
+    ViewData["Title"] = $"Promote Class - {Model.DisplayName}";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+}
+
+<style>
+    .promotion-container {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+    
+    .promotion-header {
+        background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+        color: white;
+        padding: 25px 30px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .promotion-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        animation: rotate 20s linear infinite;
+    }
+    
+    @@keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    .promotion-header-content {
+        position: relative;
+        z-index: 2;
+    }
+    
+    .promotion-info {
+        padding: 30px;
+        background: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        margin-bottom: 30px;
+    }
+    
+    .info-section {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .info-section h5 {
+        color: #2c3e50;
+        margin-bottom: 15px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .promotion-path {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        padding: 30px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        margin: 30px;
+        border-radius: 15px;
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+    
+    .class-badge {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 15px 25px;
+        border-radius: 25px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .arrow-icon {
+        font-size: 2rem;
+        animation: bounce 2s infinite;
+    }
+    
+    @@keyframes bounce {
+        0%, 20%, 50%, 80%, 100% { transform: translateX(0); }
+        40% { transform: translateX(-5px); }
+        60% { transform: translateX(5px); }
+    }
+    
+    .statistics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 20px;
+        padding: 30px;
+        background: #f8f9fa;
+    }
+    
+    .stat-item {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .stat-item.success {
+        border-left: 4px solid #27ae60;
+    }
+    
+    .stat-item.warning {
+        border-left: 4px solid #f39c12;
+    }
+    
+    .stat-item.danger {
+        border-left: 4px solid #e74c3c;
+    }
+    
+    .stat-item.info {
+        border-left: 4px solid #3498db;
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+    
+    .stat-label {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+    
+    .confirmation-section {
+        padding: 30px;
+        background: #fff;
+        border-top: 1px solid #e9ecef;
+    }
+    
+    .confirmation-box {
+        background: #fffbf0;
+        border: 2px solid #f39c12;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .confirmation-box h5 {
+        color: #f39c12;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .confirmation-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 20px 0;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .confirmation-checkbox input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+    }
+    
+    .action-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+    
+    .professional-btn {
+        padding: 15px 30px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+        cursor: pointer;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .btn-promote {
+        background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+    }
+    
+    .btn-promote:hover:not(:disabled) {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(39, 174, 96, 0.4);
+        color: white;
+    }
+    
+    .btn-promote:disabled {
+        background: #95a5a6;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+    
+    .btn-cancel {
+        background: #6c757d;
+        color: white;
+    }
+    
+    .btn-cancel:hover {
+        background: #5a6268;
+        transform: translateY(-2px);
+        color: white;
+    }
+    
+    .graduation-notice {
+        background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        margin: 20px 0;
+        text-align: center;
+        box-shadow: 0 5px 15px rgba(243, 156, 18, 0.3);
+    }
+    
+    .graduation-notice h4 {
+        margin: 0 0 10px 0;
+        font-size: 1.3rem;
+    }
+</style>
+
+<div class="promotion-container">
+    <div class="promotion-header">
+        <div class="promotion-header-content">
+            <h4 class="mb-0">
+                <i class="fas fa-graduation-cap me-2"></i>
+                Class Promotion - @Model.DisplayName
+            </h4>
+            <p class="mb-0 mt-2">Academic Year: @ViewBag.AcademicYear</p>
+        </div>
+    </div>
+    
+    <!-- Promotion Information -->
+    <div class="promotion-info">
+        <div class="info-grid">
+            <div class="info-section">
+                <h5>
+                    <i class="fas fa-info-circle text-info"></i>
+                    Current Class Information
+                </h5>
+                <p><strong>Class:</strong> @Model.DisplayName</p>
+                @if (!string.IsNullOrEmpty(Model.TeacherInCharge))
+                {
+                    <p><strong>Teacher:</strong> @Model.TeacherInCharge</p>
+                }
+                @if (!string.IsNullOrEmpty(Model.RoomNumber))
+                {
+                    <p><strong>Room:</strong> @Model.RoomNumber</p>
+                }
+                <p><strong>Total Students:</strong> @ViewBag.TotalStudents</p>
+            </div>
+            
+            <div class="info-section">
+                <h5>
+                    <i class="fas fa-chart-line text-success"></i>
+                    Promotion Status
+                </h5>
+                @if (ViewBag.CanPromote)
+                {
+                    <div class="alert alert-success mb-2">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <strong>Ready for Promotion!</strong>
+                    </div>
+                    <p>All students have completed their final exams and are ready to be promoted.</p>
+                }
+                else
+                {
+                    <div class="alert alert-warning mb-2">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Not Ready for Promotion</strong>
+                    </div>
+                    <p>Some students haven't completed their final exams yet. Please complete all exam results first.</p>
+                }
+            </div>
+        </div>
+        
+        <!-- Promotion Path -->
+        @if (ViewBag.IsMatricClass)
+        {
+            <div class="graduation-notice">
+                <h4>🎓 Matriculation Class - Students Will Graduate!</h4>
+                <p class="mb-0">This is the final class. Students will be graduated and moved to the Alumni section.</p>
+            </div>
+        }
+        else if (ViewBag.NextClass != null)
+        {
+            <div class="promotion-path">
+                <div class="class-badge">
+                    📚 @Model.DisplayName
+                </div>
+                <div class="arrow-icon">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+                <div class="class-badge">
+                    🎯 @ViewBag.NextClass.DisplayName
+                </div>
+            </div>
+        }
+    </div>
+    
+    <!-- Statistics -->
+    <div class="statistics-grid">
+        <div class="stat-item info">
+            <div class="stat-value">@ViewBag.TotalStudents</div>
+            <div class="stat-label">Total Students</div>
+        </div>
+        <div class="stat-item success">
+            <div class="stat-value">@ViewBag.PassedStudents</div>
+            <div class="stat-label">Students Passed</div>
+        </div>
+        <div class="stat-item danger">
+            <div class="stat-value">@ViewBag.FailedStudents</div>
+            <div class="stat-label">Students Failed</div>
+        </div>
+        <div class="stat-item warning">
+            <div class="stat-value">@ViewBag.StudentsWithoutResults</div>
+            <div class="stat-label">Missing Results</div>
+        </div>
+    </div>
+    
+    @if (ViewBag.CanPromote)
+    {
+        <!-- Confirmation Section -->
+        <div class="confirmation-section">
+            <div class="confirmation-box">
+                <h5>
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Important Notice
+                </h5>
+                <ul class="mb-3">
+                    <li><strong>Passed students</strong> will be promoted to @(ViewBag.IsMatricClass ? "Alumni (Graduated)" : ViewBag.NextClass?.DisplayName ?? "next class")</li>
+                    <li><strong>Failed students</strong> will be retained in the current class</li>
+                    <li>This action creates a permanent record in the system</li>
+                    <li><strong>This action cannot be undone!</strong></li>
+                </ul>
+            </div>
+            
+            <form asp-action="BulkPromote" method="post">
+                <input type="hidden" name="academicYear" value="@ViewBag.AcademicYear" />
+                
+                <div class="confirmation-checkbox">
+                    <input type="checkbox" id="confirmPromotion" name="confirmPromotion" value="true" required />
+                    <label for="confirmPromotion" class="mb-0">
+                        <strong>I confirm that I want to promote this class and understand this action is permanent.</strong>
+                    </label>
+                </div>
+                
+                <div class="action-buttons">
+                    <button type="submit" id="promoteBtn" class="professional-btn btn-promote" disabled>
+                        <i class="fas fa-graduation-cap"></i>
+                        @(ViewBag.IsMatricClass ? "Graduate Class" : "Promote Class")
+                    </button>
+                    
+                    <a asp-action="Details" asp-route-id="@Model.Id" class="professional-btn btn-cancel">
+                        <i class="fas fa-times"></i>
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    }
+    else
+    {
+        <div class="confirmation-section">
+            <div class="alert alert-warning text-center">
+                <h5><i class="fas fa-exclamation-triangle me-2"></i>Cannot Promote Class</h5>
+                <p class="mb-3">This class is not ready for promotion yet. Please ensure all students have completed their final exams.</p>
+                <a asp-controller="Exam" asp-action="ClassExamStatus" asp-route-classId="@Model.Id" 
+                   class="professional-btn btn-promote">
+                    <i class="fas fa-clipboard-list"></i>
+                    View Exam Status
+                </a>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Enable/disable promote button based on checkbox
+            $('#confirmPromotion').on('change', function() {
+                $('#promoteBtn').prop('disabled', !this.checked);
+            });
+            
+            // Add confirmation dialog
+            $('form').on('submit', function(e) {
+                if (!confirm('Are you absolutely sure you want to promote this class? This action cannot be undone!')) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+        });
+    </script>
+}

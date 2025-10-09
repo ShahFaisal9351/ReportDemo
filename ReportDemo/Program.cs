@@ -41,10 +41,12 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Cookie.HttpOnly = true;
-    options.ExpireTimeSpan = TimeSpan.FromMinutes(30); // cookie lifetime
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(30); // reasonable cookie lifetime
     options.LoginPath = "/Account/Login"; // redirect login
     options.AccessDeniedPath = "/Account/Login"; // redirect denied
     options.SlidingExpiration = false; // disable persistent cookies
+    options.Cookie.Name = "EduAuth";
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
 });
 
 var app = builder.Build();
@@ -66,6 +68,12 @@ app.UseAuthorization();
 // Default route
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Account}/{action=Login}/{id?}");
+    pattern: "{controller=Home}/{action=Index}/{id?}");
+
+// Account route for unauthenticated users
+app.MapControllerRoute(
+    name: "account",
+    pattern: "Account/{action=Login}/{id?}",
+    defaults: new { controller = "Account" });
 
 app.Run();
