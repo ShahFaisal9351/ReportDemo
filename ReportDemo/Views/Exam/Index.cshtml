@@ -1,0 +1,366 @@
+@model List<ReportDemo.Models.ExamResult>
+@{
+    ViewData["Title"] = "Exam Results";
+    Layout = "_DashboardLayout";
+}
+
+<style>
+    .exam-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    }
+    
+    .exam-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+        border: none;
+    }
+    
+    .exam-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+    }
+    
+    .filter-section {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+    }
+    
+    .stats-card {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+        text-align: center;
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+    }
+    
+    .stats-card h3 {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    
+    .grade-badge {
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 0.9rem;
+    }
+    
+    .grade-a { background: linear-gradient(135deg, #4CAF50, #45a049); color: white; }
+    .grade-b { background: linear-gradient(135deg, #2196F3, #0b7dda); color: white; }
+    .grade-c { background: linear-gradient(135deg, #FF9800, #e68900); color: white; }
+    .grade-d { background: linear-gradient(135deg, #FF5722, #d84315); color: white; }
+    .grade-f { background: linear-gradient(135deg, #f44336, #c62828); color: white; }
+    
+    .exam-status {
+        padding: 6px 12px;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .status-completed { background: #d4edda; color: #155724; }
+    .status-pending { background: #fff3cd; color: #856404; }
+    
+    .action-btn {
+        padding: 8px 15px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        margin: 2px;
+        display: inline-block;
+    }
+    
+    .btn-view { background: #17a2b8; color: white; }
+    .btn-edit { background: #28a745; color: white; }
+    .btn-record { background: #007bff; color: white; }
+    .btn-bulk { background: #6f42c1; color: white; }
+    
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #6c757d;
+    }
+    
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        color: #dee2e6;
+    }
+</style>
+
+<div class="exam-header">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h1><i class="fas fa-clipboard-list me-3"></i>Exam Results Management</h1>
+            <p class="mb-0">Manage and track student examination results across all classes</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a asp-action="Create" class="btn btn-light btn-lg">
+                <i class="fas fa-plus me-2"></i>Record New Result
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="stats-card">
+            <h3>@Model.Count</h3>
+            <p class="mb-0">Total Results</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stats-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <h3>@Model.Count(e => e.IsPassed)</h3>
+            <p class="mb-0">Passed Students</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stats-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+            <h3>@Model.Count(e => !e.IsPassed)</h3>
+            <p class="mb-0">Failed Students</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stats-card" style="background: linear-gradient(135deg, #4481eb 0%, #04befe 100%);">
+            <h3>@(Model.Count > 0 ? Math.Round(Model.Average(e => e.Percentage), 1) : 0)%</h3>
+            <p class="mb-0">Average Score</p>
+        </div>
+    </div>
+</div>
+
+<!-- Filter Section -->
+<div class="filter-section">
+    <form method="get" class="row g-3">
+        <div class="col-md-4">
+            <label class="form-label"><i class="fas fa-calendar me-2"></i>Academic Year</label>
+            <select name="academicYear" class="form-select">
+                <option value="">All Years</option>
+                <option value="@ViewBag.CurrentAcademicYear" selected>@ViewBag.CurrentAcademicYear</option>
+                <option value="2023-24">2023-24</option>
+                <option value="2022-23">2022-23</option>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label"><i class="fas fa-chalkboard me-2"></i>Class</label>
+            <select name="classId" class="form-select">
+                <option value="">All Classes</option>
+                @if (ViewBag.Classes != null)
+                {
+                    @foreach (var cls in ViewBag.Classes)
+                    {
+                        <option value="@cls.Id">
+                            Class @cls.ClassName - @cls.Section
+                        </option>
+                    }
+                }
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">&nbsp;</label>
+            <div>
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="fas fa-filter me-2"></i>Filter Results
+                </button>
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="fas fa-undo me-2"></i>Reset
+                </a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="exam-card">
+            <h5><i class="fas fa-bolt text-primary me-2"></i>Quick Actions</h5>
+            <div class="mt-3">
+                <a asp-action="Create" class="action-btn btn-record">
+                    <i class="fas fa-plus me-2"></i>Record Single Result
+                </a>
+                @if (ViewBag.Classes != null)
+                {
+                    @foreach (var cls in ViewBag.Classes)
+                    {
+                        <a asp-action="BulkRecordResults" asp-route-classId="@cls.Id" class="action-btn btn-bulk">
+                            <i class="fas fa-list me-2"></i>Bulk Results - Class @cls.ClassName
+                        </a>
+                    }
+                }
+                <a asp-action="ExamReports" class="action-btn btn-view">
+                    <i class="fas fa-chart-bar me-2"></i>View Reports
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Results Table -->
+@if (Model.Any())
+{
+    <div class="exam-card">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5><i class="fas fa-list me-2"></i>Exam Results</h5>
+            <div>
+                <button class="btn btn-sm btn-outline-success" onclick="exportResults()">
+                    <i class="fas fa-download me-2"></i>Export to Excel
+                </button>
+            </div>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th><i class="fas fa-user me-2"></i>Student</th>
+                        <th><i class="fas fa-id-card me-2"></i>Roll No.</th>
+                        <th><i class="fas fa-chalkboard me-2"></i>Class</th>
+                        <th><i class="fas fa-percentage me-2"></i>Percentage</th>
+                        <th><i class="fas fa-medal me-2"></i>Grade</th>
+                        <th><i class="fas fa-check-circle me-2"></i>Status</th>
+                        <th><i class="fas fa-calendar me-2"></i>Exam Date</th>
+                        <th><i class="fas fa-cogs me-2"></i>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var result in Model.OrderByDescending(r => r.ExamDate))
+                    {
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="user-avatar me-3" style="width: 35px; height: 35px; font-size: 14px;">
+                                        @(result.Student?.FullName?.Substring(0, 1).ToUpper() ?? "N")
+                                    </div>
+                                    <div>
+                                        <strong>@result.Student?.FullName</strong>
+                                        <br><small class="text-muted">@result.Student?.Email</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><strong>@result.Student?.RollNumber</strong></td>
+                            <td>
+                                <span class="badge bg-primary">Class @result.Class?.ClassName - @result.Class?.Section</span>
+                            </td>
+                            <td>
+                                <strong style="font-size: 1.1rem; color: @(result.Percentage >= 40 ? "#28a745" : "#dc3545");">
+                                    @result.Percentage.ToString("F1")%
+                                </strong>
+                            </td>
+                            <td>
+                                <span class="grade-badge grade-@(result.Grade?.ToLower().Replace("+", ""))">
+                                    @result.Grade
+                                </span>
+                            </td>
+                            <td>
+                                <span class="exam-status @(result.IsPassed ? "status-completed" : "status-pending")">
+                                    <i class="fas fa-@(result.IsPassed ? "check" : "times") me-1"></i>
+                                    @(result.IsPassed ? "Passed" : "Failed")
+                                </span>
+                            </td>
+                            <td>
+                                @result.ExamDate.ToString("MMM dd, yyyy")
+                                <br><small class="text-muted">@result.ExamDate.ToString("HH:mm")</small>
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a asp-action="Details" asp-route-id="@result.Id" class="action-btn btn-view btn-sm">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@result.Id" class="action-btn btn-edit btn-sm">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a asp-action="ClassExamStatus" asp-route-classId="@result.ClassId" class="action-btn btn-record btn-sm">
+                                        <i class="fas fa-users"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+else
+{
+    <div class="exam-card">
+        <div class="empty-state">
+            <i class="fas fa-clipboard-list"></i>
+            <h3>No Exam Results Found</h3>
+            <p>Start by recording exam results for your students.</p>
+            <a asp-action="Create" class="btn btn-primary btn-lg">
+                <i class="fas fa-plus me-2"></i>Record First Result
+            </a>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        // Auto-activate sidebar menu
+        document.addEventListener('DOMContentLoaded', function() {
+            const examLink = document.querySelector('a[asp-controller="Exam"][asp-action="Index"]');
+            if (examLink) {
+                examLink.classList.add('active');
+            }
+        });
+
+        function exportResults() {
+            // Export functionality
+            window.print();
+        }
+        
+        // Real-time search
+        function searchResults() {
+            const input = document.getElementById('searchInput');
+            const filter = input.value.toUpperCase();
+            const table = document.querySelector('table tbody');
+            const tr = table.getElementsByTagName('tr');
+
+            for (let i = 0; i < tr.length; i++) {
+                const td = tr[i].getElementsByTagName('td')[0];
+                if (td) {
+                    const txtValue = td.textContent || td.innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = '';
+                    } else {
+                        tr[i].style.display = 'none';
+                    }
+                }
+            }
+        }
+        
+        // Filter animations
+        document.querySelectorAll('.form-select').forEach(select => {
+            select.addEventListener('change', function() {
+                this.style.transform = 'scale(1.02)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 150);
+            });
+        });
+    </script>
+}

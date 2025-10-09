@@ -1,0 +1,415 @@
+@model ReportDemo.Models.ExamResult
+@{
+    ViewData["Title"] = "Exam Result Details";
+    Layout = "_DashboardLayout";
+}
+
+<style>
+    .details-header {
+        background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(23, 162, 184, 0.3);
+    }
+    
+    .details-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .student-profile {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 15px;
+        padding: 2rem;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .student-avatar {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin: 0 auto 1rem;
+        border: 5px solid white;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .grade-display {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        text-align: center;
+        font-size: 3rem;
+        font-weight: bold;
+        margin: 1rem 0;
+        box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+    }
+    
+    .grade-display.failing {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        box-shadow: 0 8px 25px rgba(220, 53, 69, 0.3);
+    }
+    
+    .percentage-display {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        text-align: center;
+        font-size: 2rem;
+        font-weight: bold;
+        margin: 1rem 0;
+    }
+    
+    .status-badge {
+        padding: 12px 25px;
+        border-radius: 25px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        display: inline-block;
+        margin: 1rem 0;
+    }
+    
+    .status-passed {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+    }
+    
+    .status-failed {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+    }
+    
+    .info-item {
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        border-left: 4px solid #667eea;
+    }
+    
+    .info-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .info-value {
+        font-size: 1.1rem;
+        color: #2c3e50;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+    
+    .btn-action {
+        padding: 12px 25px;
+        border-radius: 10px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .btn-edit {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+    }
+    
+    .btn-delete {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+    }
+    
+    .btn-back {
+        background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+        color: white;
+    }
+    
+    .btn-action:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .remarks-section {
+        background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-top: 2rem;
+        border-left: 5px solid #ffc107;
+    }
+    
+    .timeline-item {
+        border-left: 3px solid #667eea;
+        padding-left: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .timeline-dot {
+        width: 12px;
+        height: 12px;
+        background: #667eea;
+        border-radius: 50%;
+        margin-left: -7.5px;
+        margin-bottom: 1rem;
+    }
+</style>
+
+<div class="details-header">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h1><i class="fas fa-eye me-3"></i>Exam Result Details</h1>
+            <p class="mb-0">Detailed view of student examination performance</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a asp-action="Index" class="btn btn-light">
+                <i class="fas fa-list me-2"></i>All Results
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Student Profile -->
+    <div class="col-lg-4">
+        <div class="details-card">
+            <div class="student-profile">
+                <div class="student-avatar">
+                    @(Model.Student?.FullName?.Substring(0, 1).ToUpper() ?? "N")
+                </div>
+                <h3 class="mb-2">@Model.Student?.FullName</h3>
+                <p class="text-muted mb-3">@Model.Student?.Email</p>
+                <div class="row text-center">
+                    <div class="col-6">
+                        <strong>Roll Number</strong>
+                        <br><span class="badge bg-primary">@Model.Student?.RollNumber</span>
+                    </div>
+                    <div class="col-6">
+                        <strong>Class</strong>
+                        <br><span class="badge bg-secondary">@Model.Class?.ClassName - @Model.Class?.Section</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Grade & Score -->
+    <div class="col-lg-8">
+        <div class="details-card">
+            <h4 class="mb-4"><i class="fas fa-chart-line me-2 text-primary"></i>Performance Summary</h4>
+            
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="percentage-display">
+                        @Model.Percentage.ToString("F1")%
+                        <div style="font-size: 1rem; margin-top: 0.5rem;">Score</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="grade-display @(Model.IsPassed ? "" : "failing")">
+                        @Model.Grade
+                        <div style="font-size: 1rem; margin-top: 0.5rem;">Grade</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="text-center" style="padding: 2rem 0;">
+                        <div class="status-badge @(Model.IsPassed ? "status-passed" : "status-failed")">
+                            <i class="fas fa-@(Model.IsPassed ? "check-circle" : "times-circle") me-2"></i>
+                            @(Model.IsPassed ? "PASSED" : "FAILED")
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Performance Analysis -->
+            <div class="mt-4">
+                <h6><i class="fas fa-analytics me-2"></i>Performance Analysis</h6>
+                <div class="progress" style="height: 10px; border-radius: 5px;">
+                    <div class="progress-bar @(Model.IsPassed ? "bg-success" : "bg-danger")" 
+                         style="width: @Model.Percentage%"></div>
+                </div>
+                <div class="d-flex justify-content-between mt-2">
+                    <small class="text-muted">0%</small>
+                    <small class="text-muted">Passing Grade: 40%</small>
+                    <small class="text-muted">100%</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Exam Information -->
+<div class="details-card">
+    <h4 class="mb-4"><i class="fas fa-info-circle me-2 text-info"></i>Exam Information</h4>
+    
+    <div class="row">
+        <div class="col-md-3">
+            <div class="info-item">
+                <div class="info-label">
+                    <i class="fas fa-calendar"></i>
+                    Academic Year
+                </div>
+                <div class="info-value">@Model.AcademicYear</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="info-item">
+                <div class="info-label">
+                    <i class="fas fa-clock"></i>
+                    Term
+                </div>
+                <div class="info-value">@Model.Term</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="info-item">
+                <div class="info-label">
+                    <i class="fas fa-calendar-day"></i>
+                    Exam Date
+                </div>
+                <div class="info-value">@Model.ExamDate.ToString("MMM dd, yyyy")</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="info-item">
+                <div class="info-label">
+                    <i class="fas fa-check-circle"></i>
+                    Status
+                </div>
+                <div class="info-value">
+                    @(Model.ExamCompleted ? "Completed" : "Pending")
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Remarks Section -->
+@if (!string.IsNullOrWhiteSpace(Model.Remarks))
+{
+    <div class="details-card">
+        <h4 class="mb-3"><i class="fas fa-comment me-2 text-warning"></i>Remarks</h4>
+        <div class="remarks-section">
+            <p class="mb-0">@Model.Remarks</p>
+        </div>
+    </div>
+}
+
+<!-- Timeline -->
+<div class="details-card">
+    <h4 class="mb-4"><i class="fas fa-history me-2 text-secondary"></i>Record Timeline</h4>
+    
+    <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="info-label">
+            <i class="fas fa-plus-circle text-success"></i>
+            Result Recorded
+        </div>
+        <div class="info-value">
+            @Model.CreatedAt.ToString("MMM dd, yyyy 'at' HH:mm")
+        </div>
+    </div>
+    
+    @if (Model.UpdatedAt != Model.CreatedAt)
+    {
+        <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="info-label">
+                <i class="fas fa-edit text-primary"></i>
+                Last Updated
+            </div>
+            <div class="info-value">
+                @Model.UpdatedAt.ToString("MMM dd, yyyy 'at' HH:mm")
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Action Buttons -->
+<div class="details-card">
+    <h4 class="mb-3"><i class="fas fa-cogs me-2"></i>Actions</h4>
+    <div class="action-buttons">
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn-action btn-edit">
+            <i class="fas fa-edit"></i>
+            Edit Result
+        </a>
+        <a asp-action="ClassExamStatus" asp-route-classId="@Model.ClassId" class="btn-action btn-back">
+            <i class="fas fa-users"></i>
+            View Class Results
+        </a>
+        <button type="button" class="btn-action btn-delete" onclick="confirmDelete(@Model.Id)">
+            <i class="fas fa-trash"></i>
+            Delete Result
+        </button>
+        <a asp-action="Index" class="btn-action btn-back">
+            <i class="fas fa-arrow-left"></i>
+            Back to List
+        </a>
+    </div>
+</div>
+
+<!-- Hidden delete form -->
+<form asp-action="Delete" asp-route-id="@Model.Id" method="post" id="deleteForm" style="display: none;">
+    @Html.AntiForgeryToken()
+</form>
+
+@section Scripts {
+    <script>
+        function confirmDelete(id) {
+            Swal.fire({
+                title: 'Delete Exam Result?',
+                text: 'This action cannot be undone. The exam result will be permanently deleted.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, Delete',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('deleteForm').submit();
+                }
+            });
+        }
+        
+        // Add print functionality
+        function printResult() {
+            window.print();
+        }
+        
+        // Auto-activate sidebar menu
+        document.addEventListener('DOMContentLoaded', function() {
+            const examLink = document.querySelector('a[asp-controller="Exam"][asp-action="Index"]');
+            if (examLink) {
+                examLink.classList.add('active');
+            }
+        });
+    </script>
+    
+    <!-- SweetAlert2 for better alerts -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+}

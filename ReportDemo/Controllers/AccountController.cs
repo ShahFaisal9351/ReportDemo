@@ -33,6 +33,7 @@ namespace ReportDemo.Controllers
             {
                 // Sign in non-persistent (auto-logout on browser close)
                 await _signInManager.SignInAsync(user, isPersistent: false);
+                
                 return RedirectToAction("Index", "Home"); // redirect to dashboard
             }
 
@@ -42,6 +43,30 @@ namespace ReportDemo.Controllers
             return View(model);
         }
 
+        [HttpGet]
+        public IActionResult Welcome()
+        {
+            return View();
+        }
+        
+        // GET: Account/TestAuth - for debugging authentication state
+        public IActionResult TestAuth()
+        {
+            var authInfo = new
+            {
+                IsAuthenticated = User.Identity?.IsAuthenticated ?? false,
+                UserName = User.Identity?.Name ?? "Not logged in",
+                SessionActive = HttpContext.Session.GetString("AppSessionActive"),
+                LoginTime = HttpContext.Session.GetString("LoginTime"),
+                AppInstanceId = HttpContext.Session.GetString("AppInstanceId"),
+                CookieCount = Request.Cookies.Count,
+                Cookies = Request.Cookies.Keys.ToArray()
+            };
+            
+            ViewBag.AuthInfo = authInfo;
+            return View();
+        }
+        
         [HttpGet]
         public IActionResult Login(string returnUrl = null)
         {
@@ -101,13 +126,6 @@ namespace ReportDemo.Controllers
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
-            
-            // Clear all cookies
-            foreach (var cookie in Request.Cookies.Keys)
-            {
-                Response.Cookies.Delete(cookie);
-            }
-            
             return RedirectToAction("Login", "Account");
         }
         
@@ -116,13 +134,14 @@ namespace ReportDemo.Controllers
         {
             await _signInManager.SignOutAsync();
             
+            // Clear session first
+            HttpContext.Session.Clear();
+            
             // Clear all cookies
             foreach (var cookie in Request.Cookies.Keys)
             {
                 Response.Cookies.Delete(cookie);
             }
-            
-            HttpContext.Session.Clear();
             
             TempData["Message"] = "All authentication data cleared. Please login again.";
             return RedirectToAction("Login", "Account");
@@ -144,26 +163,18 @@ namespace ReportDemo.Controllers
             return View();
         }
         
-        // GET: Account/ForceLogout - clear all authentication (development only)
+        // GET: Account/ForceLogout - clear all authentication
         public async Task<IActionResult> ForceLogout()
         {
-            // Sign out from Identity
             await _signInManager.SignOutAsync();
             
-            // Clear ALL cookies
+            // Clear all cookies
             foreach (var cookie in Request.Cookies.Keys)
             {
-                Response.Cookies.Delete(cookie, new CookieOptions { Path = "/" });
-                Response.Cookies.Delete(cookie, new CookieOptions { Path = "/", Domain = Request.Host.Host });
+                Response.Cookies.Delete(cookie);
             }
             
-            // Clear session if exists
-            if (HttpContext.Session != null)
-            {
-                HttpContext.Session.Clear();
-            }
-            
-            TempData["Message"] = "All authentication cleared! Please login again.";
+            TempData["SuccessMessage"] = "Logged out successfully. Please login again.";
             return RedirectToAction("Login", "Account");
         }
     }

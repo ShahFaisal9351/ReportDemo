@@ -1,8 +1,15 @@
 @model ReportDemo.Models.LoginViewModel
 @{
     Layout = "~/Views/Shared/_AuthLayout.cshtml";
-    ViewData["Title"] = "Login";
+    ViewData["Title"] = "Login Required";
 }
+
+<!-- Fresh Start Notification -->
+<div class="alert alert-info alert-dismissible fade show" role="alert">
+    <i class="fas fa-rocket me-2"></i>
+    <strong>Fresh Start!</strong> Please log in to access your dashboard.
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
 
 <form asp-action="Login" method="post">
     <div asp-validation-summary="All" class="validation-summary"></div>

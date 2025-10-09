@@ -1,0 +1,359 @@
+@model ReportDemo.Models.ExamResult
+
+@{
+    ViewData["Title"] = "Delete Exam Result";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="content-wrapper">
+    <!-- Content Header -->
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>
+                        <i class="fas fa-trash-alt text-danger"></i>
+                        Delete Exam Result
+                    </h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="/">Home</a></li>
+                        <li class="breadcrumb-item"><a href="/Exam">Exam Results</a></li>
+                        <li class="breadcrumb-item active">Delete</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row justify-content-center">
+                <div class="col-md-10">
+                    <!-- Warning Alert -->
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        <h5><i class="icon fas fa-exclamation-triangle"></i> Warning!</h5>
+                        You are about to permanently delete this exam result. This action cannot be undone.
+                        Please review the information carefully before proceeding.
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+
+                    <div class="card card-danger card-outline">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                Exam Result Details
+                            </h3>
+                        </div>
+                        
+                        <div class="card-body">
+                            <!-- Student Information -->
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="info-box bg-light">
+                                        <span class="info-box-icon bg-primary"><i class="fas fa-user-graduate"></i></span>
+                                        <div class="info-box-content">
+                                            <span class="info-box-text">Student</span>
+                                            <span class="info-box-number">@Model.Student.FirstName @Model.Student.LastName</span>
+                                            <span class="progress-description">Roll: @Model.Student.RollNumber</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-box bg-light">
+                                        <span class="info-box-icon bg-info"><i class="fas fa-clipboard-list"></i></span>
+                                        <div class="info-box-content">
+                                            <span class="info-box-text">Exam</span>
+                                            <span class="info-box-number">@Model.Term Exam</span>
+                                            <span class="progress-description">Academic Year: @Model.AcademicYear</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Exam Details -->
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="card card-outline card-primary">
+                                        <div class="card-body text-center">
+                                            <h5 class="card-title">
+                                                <i class="fas fa-trophy text-warning"></i>
+                                                Score
+                                            </h5>
+                                            <h2 class="text-primary">@Model.Percentage%</h2>
+                                            <p class="text-muted">Percentage Score</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="card card-outline card-success">
+                                        <div class="card-body text-center">
+                                            <h5 class="card-title">
+                                                <i class="fas fa-percent text-info"></i>
+                                                Percentage
+                                            </h5>
+                                            <h2 class="text-success">@Math.Round(Model.Percentage, 2)%</h2>
+                                            <div class="progress">
+                                                <div class="progress-bar @(Model.Percentage >= 60 ? "bg-success" : (Model.Percentage >= 40 ? "bg-warning" : "bg-danger"))" 
+                                                     style="width: @Model.Percentage%">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="card card-outline @(Model.Grade != "F" ? "card-success" : "card-danger")">
+                                        <div class="card-body text-center">
+                                            <h5 class="card-title">
+                                                <i class="fas fa-medal text-warning"></i>
+                                                Grade
+                                            </h5>
+                                            <h2 class="@(Model.Grade != "F" ? "text-success" : "text-danger")">@Model.Grade</h2>
+                                            <p class="text-muted">@Model.ResultStatus</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Additional Information -->
+                            <div class="row mt-4">
+                                <div class="col-md-6">
+                                    <table class="table table-striped">
+                                        <tbody>
+                                            <tr>
+                                                <th width="40%"><i class="fas fa-calendar mr-2"></i>Exam Date:</th>
+                                                <td>@Model.ExamDate.ToString("MMM dd, yyyy")</td>
+                                            </tr>
+                                            <tr>
+                                                <th><i class="fas fa-clock mr-2"></i>Created:</th>
+                                                <td>@Model.CreatedAt.ToString("MMM dd, yyyy - hh:mm tt")</td>
+                                            </tr>
+                                            <tr>
+                                                <th><i class="fas fa-user mr-2"></i>Conducted By:</th>
+                                                <td>@(Model.ConductedBy ?? "Not specified")</td>
+                                            </tr>
+                                            <tr>
+                                                <th><i class="fas fa-edit mr-2"></i>Last Updated:</th>
+                                                <td>@Model.UpdatedAt.ToString("MMM dd, yyyy - hh:mm tt")</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="col-md-6">
+                                    @if (!string.IsNullOrEmpty(Model.Remarks))
+                                    {
+                                        <div class="card card-outline card-info">
+                                            <div class="card-header">
+                                                <h3 class="card-title">
+                                                    <i class="fas fa-comment mr-2"></i>
+                                                    Remarks
+                                                </h3>
+                                            </div>
+                                            <div class="card-body">
+                                                <p class="mb-0">@Model.Remarks</p>
+                                            </div>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="alert alert-info">
+                                            <i class="fas fa-info-circle mr-2"></i>
+                                            No additional remarks were recorded for this exam result.
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card Footer with Actions -->
+                        <div class="card-footer">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <form asp-action="Delete" method="post" id="deleteForm" class="d-inline">
+                                        <input type="hidden" asp-for="Id" />
+                                        <button type="submit" class="btn btn-danger btn-lg" id="deleteBtn">
+                                            <i class="fas fa-trash-alt mr-2"></i>
+                                            Yes, Delete This Result
+                                        </button>
+                                    </form>
+                                </div>
+                                <div class="col-md-6 text-right">
+                                    <a href="@Url.Action("Details", new { id = Model.Id })" class="btn btn-info btn-lg mr-2">
+                                        <i class="fas fa-eye mr-2"></i>
+                                        View Details
+                                    </a>
+                                    <a href="@Url.Action("Index")" class="btn btn-default btn-lg">
+                                        <i class="fas fa-arrow-left mr-2"></i>
+                                        Cancel
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Impact Warning -->
+                    <div class="alert alert-danger mt-3">
+                        <h5><i class="fas fa-exclamation-triangle mr-2"></i>Important Notice</h5>
+                        <ul class="mb-0">
+                            <li>This exam result will be permanently removed from the database</li>
+                            <li>Any associated reports or analytics will be updated to exclude this record</li>
+                            <li>This action cannot be reversed - you will need to re-enter the data if needed</li>
+                            <li>Consider editing the result instead of deleting if you need to make corrections</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+@section Scripts {
+    <!-- SweetAlert2 -->
+    <script src="~/lib/adminlte3/plugins/sweetalert2/sweetalert2.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            $('#deleteForm').on('submit', function(e) {
+                e.preventDefault();
+                
+                Swal.fire({
+                    title: 'Are you absolutely sure?',
+                    html: `
+                        <div class="text-left">
+                            <p>You are about to delete the exam result for:</p>
+                            <ul>
+                                <li><strong>Student:</strong> @Model.Student.FirstName @Model.Student.LastName</li>
+                                <li><strong>Exam:</strong> @Model.Term Exam (@Model.AcademicYear)</li>
+                                <li><strong>Score:</strong> @Model.Percentage%</li>
+                                <li><strong>Grade:</strong> @Model.Grade</li>
+                            </ul>
+                            <p class="text-danger"><strong>This action cannot be undone!</strong></p>
+                        </div>
+                    `,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: '<i class="fas fa-trash-alt mr-2"></i>Yes, Delete Forever!',
+                    cancelButtonText: '<i class="fas fa-times mr-2"></i>Cancel',
+                    focusCancel: true,
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Show loading state
+                        Swal.fire({
+                            title: 'Deleting...',
+                            text: 'Please wait while we remove this exam result.',
+                            allowOutsideClick: false,
+                            showConfirmButton: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+                        
+                        // Submit the form
+                        this.submit();
+                    }
+                });
+                
+                return false;
+            });
+
+            // Add hover effects to action buttons
+            $('.btn').hover(
+                function() {
+                    $(this).addClass('shadow');
+                },
+                function() {
+                    $(this).removeClass('shadow');
+                }
+            );
+        });
+    </script>
+}
+
+@section Styles {
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="~/lib/adminlte3/plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css">
+
+    <style>
+        .info-box {
+            border-radius: 0.5rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            transition: all 0.3s ease;
+        }
+
+        .info-box:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+        
+        .card {
+            border-radius: 0.5rem;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+        }
+        
+        .btn-lg {
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+        
+        .alert {
+            border-radius: 0.5rem;
+        }
+        
+        .progress {
+            height: 8px;
+            border-radius: 4px;
+        }
+        
+        .table th {
+            border-top: none;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .card-outline.card-primary {
+            border-top: 3px solid #007bff;
+        }
+        
+        .card-outline.card-success {
+            border-top: 3px solid #28a745;
+        }
+        
+        .card-outline.card-danger {
+            border-top: 3px solid #dc3545;
+        }
+        
+        .card-outline.card-info {
+            border-top: 3px solid #17a2b8;
+        }
+
+        .swal2-html-container {
+            font-size: 1rem;
+        }
+
+        .swal2-html-container ul {
+            margin-bottom: 1rem;
+        }
+
+        .swal2-html-container li {
+            margin-bottom: 0.5rem;
+        }
+    </style>
+}

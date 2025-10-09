@@ -1,0 +1,485 @@
+@model ReportDemo.Models.ExamResult
+@{
+    ViewData["Title"] = "Record Exam Result";
+    Layout = "_DashboardLayout";
+}
+
+<style>
+    .create-header {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(40, 167, 69, 0.3);
+    }
+    
+    .form-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .form-control, .form-select {
+        border-radius: 10px;
+        border: 2px solid #e9ecef;
+        padding: 12px 15px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #28a745;
+        box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+    }
+    
+    .grade-display {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1rem;
+        border-radius: 10px;
+        text-align: center;
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin: 1rem 0;
+        transition: all 0.3s ease;
+    }
+    
+    .grade-display.passing {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    }
+    
+    .grade-display.failing {
+        background: linear-gradient(135deg, #dc3545 0%, #e74c3c 100%);
+    }
+    
+    .percentage-input {
+        font-size: 1.2rem;
+        font-weight: 600;
+        text-align: center;
+        color: #28a745;
+    }
+    
+    .student-info {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border-left: 5px solid #28a745;
+    }
+    
+    .student-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+    
+    .btn-submit {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        border: none;
+        padding: 15px 30px;
+        border-radius: 10px;
+        color: white;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+    
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        color: white;
+    }
+    
+    .progress-indicator {
+        height: 4px;
+        background: #e9ecef;
+        border-radius: 2px;
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+    
+    .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #28a745, #20c997);
+        width: 60%;
+        transition: width 0.3s ease;
+    }
+    
+    .validation-summary {
+        background: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+        padding: 1rem;
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-text {
+        color: #6c757d;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+</style>
+
+<div class="create-header">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h1><i class="fas fa-plus-circle me-3"></i>Record Exam Result</h1>
+            <p class="mb-0">Enter student examination scores and generate automated grades</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a asp-action="Index" class="btn btn-light">
+                <i class="fas fa-arrow-left me-2"></i>Back to Results
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Progress Indicator -->
+<div class="progress-indicator">
+    <div class="progress-bar"></div>
+</div>
+
+<!-- Validation Summary -->
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="validation-summary">
+        <h5><i class="fas fa-exclamation-triangle me-2"></i>Please correct the following errors:</h5>
+        <ul class="mb-0">
+            @foreach (var modelError in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <li>@modelError.ErrorMessage</li>
+            }
+        </ul>
+    </div>
+}
+
+<form asp-action="Create" method="post" id="examForm">
+    <div class="row">
+        <!-- Student Selection -->
+        <div class="col-lg-6">
+            <div class="form-card">
+                <h4><i class="fas fa-user-graduate me-2 text-primary"></i>Student Information</h4>
+                <hr>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-user"></i>
+                        Select Student
+                    </label>
+                    <select asp-for="StudentId" class="form-select" id="studentSelect" required>
+                        <option value="">Choose a student...</option>
+                        @if (ViewBag.Students != null)
+                        {
+                            @foreach (var student in ViewBag.Students)
+                            {
+                                <option value="@student.Id" data-rollnumber="@student.RollNumber" data-class="@student.Class?.ClassName" data-section="@student.Class?.Section">
+                                    @student.FullName (@student.RollNumber)
+                                </option>
+                            }
+                        }
+                    </select>
+                    <div class="form-text">Select the student for this exam result</div>
+                    <span asp-validation-for="StudentId" class="text-danger"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-chalkboard"></i>
+                        Class
+                    </label>
+                    <select asp-for="ClassId" class="form-select" id="classSelect" required>
+                        <option value="">Choose a class...</option>
+                        @if (ViewBag.Classes != null)
+                        {
+                            @foreach (var cls in ViewBag.Classes)
+                            {
+                                <option value="@cls.Id">Class @cls.ClassName - @cls.Section</option>
+                            }
+                        }
+                    </select>
+                    <div class="form-text">Select the class for this exam</div>
+                    <span asp-validation-for="ClassId" class="text-danger"></span>
+                </div>
+                
+                <!-- Student Info Display -->
+                <div id="studentInfo" class="student-info" style="display: none;">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <div class="student-avatar" id="studentAvatar">N</div>
+                        </div>
+                        <div class="col">
+                            <h5 class="mb-1" id="studentName">Student Name</h5>
+                            <p class="mb-1"><strong>Roll Number:</strong> <span id="studentRoll">-</span></p>
+                            <p class="mb-0"><strong>Class:</strong> <span id="studentClass">-</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Exam Details -->
+        <div class="col-lg-6">
+            <div class="form-card">
+                <h4><i class="fas fa-clipboard-check me-2 text-success"></i>Exam Details</h4>
+                <hr>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-calendar"></i>
+                        Academic Year
+                    </label>
+                    <input asp-for="AcademicYear" class="form-control" readonly />
+                    <div class="form-text">Current academic year</div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-clock"></i>
+                        Term
+                    </label>
+                    <select asp-for="Term" class="form-select" required>
+                        <option value="">Select term...</option>
+                        <option value="Mid-Term">Mid-Term</option>
+                        <option value="Final" selected>Final</option>
+                        <option value="Quarterly">Quarterly</option>
+                    </select>
+                    <span asp-validation-for="Term" class="text-danger"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-calendar-day"></i>
+                        Exam Date
+                    </label>
+                    <input asp-for="ExamDate" type="date" class="form-control" required />
+                    <span asp-validation-for="ExamDate" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Score Input -->
+    <div class="form-card">
+        <h4><i class="fas fa-percentage me-2 text-warning"></i>Score & Grade Calculation</h4>
+        <hr>
+        
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-calculator"></i>
+                        Percentage (%)
+                    </label>
+                    <input asp-for="Percentage" type="number" step="0.01" min="0" max="100" 
+                           class="form-control percentage-input" id="percentageInput" 
+                           placeholder="Enter percentage..." required />
+                    <div class="form-text">Enter the percentage score (0-100)</div>
+                    <span asp-validation-for="Percentage" class="text-danger"></span>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <label class="form-label">
+                    <i class="fas fa-medal"></i>
+                    Calculated Grade
+                </label>
+                <div class="grade-display" id="gradeDisplay">
+                    <span id="gradeText">Enter percentage to see grade</span>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <label class="form-label">
+                    <i class="fas fa-check-circle"></i>
+                    Pass/Fail Status
+                </label>
+                <div class="grade-display" id="statusDisplay">
+                    <span id="statusText">-</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">
+                <i class="fas fa-comment"></i>
+                Remarks (Optional)
+            </label>
+            <textarea asp-for="Remarks" class="form-control" rows="3" 
+                      placeholder="Add any additional remarks or observations..."></textarea>
+            <div class="form-text">Optional comments about the student's performance</div>
+        </div>
+    </div>
+    
+    <!-- Submit Button -->
+    <div class="form-card">
+        <div class="row">
+            <div class="col-md-6">
+                <button type="submit" class="btn btn-submit" id="submitBtn" disabled>
+                    <i class="fas fa-save me-2"></i>Record Exam Result
+                </button>
+            </div>
+            <div class="col-md-6">
+                <a asp-action="Index" class="btn btn-outline-secondary w-100" style="padding: 15px;">
+                    <i class="fas fa-times me-2"></i>Cancel
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Hidden Fields -->
+    <input asp-for="ExamCompleted" type="hidden" value="true" />
+    <input asp-for="Grade" type="hidden" id="hiddenGrade" />
+    <input asp-for="IsPassed" type="hidden" id="hiddenIsPassed" />
+</form>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function() {
+            // Set current academic year and date
+            const currentYear = new Date().getFullYear();
+            const academicYear = (new Date().getMonth() >= 3) ? `${currentYear}-${(currentYear + 1).toString().substr(-2)}` : `${currentYear - 1}-${currentYear.toString().substr(-2)}`;
+            $('input[name="AcademicYear"]').val(academicYear);
+            $('input[name="ExamDate"]').val(new Date().toISOString().split('T')[0]);
+            
+            // Student selection handler
+            $('#studentSelect').change(function() {
+                const selectedOption = $(this).find('option:selected');
+                if (selectedOption.val()) {
+                    const studentName = selectedOption.text().split(' (')[0];
+                    const rollNumber = selectedOption.data('rollnumber');
+                    const className = selectedOption.data('class');
+                    const section = selectedOption.data('section');
+                    
+                    $('#studentName').text(studentName);
+                    $('#studentRoll').text(rollNumber);
+                    $('#studentClass').text(`Class ${className} - ${section}`);
+                    $('#studentAvatar').text(studentName.charAt(0).toUpperCase());
+                    $('#studentInfo').slideDown();
+                    
+                    // Update progress
+                    updateProgress();
+                } else {
+                    $('#studentInfo').slideUp();
+                }
+            });
+            
+            // Percentage input handler
+            $('#percentageInput').on('input', function() {
+                const percentage = parseFloat($(this).val()) || 0;
+                updateGradeAndStatus(percentage);
+                updateProgress();
+                validateForm();
+            });
+            
+            // Class selection handler
+            $('#classSelect').change(function() {
+                updateProgress();
+                validateForm();
+            });
+            
+            function updateGradeAndStatus(percentage) {
+                let grade = 'F';
+                let passed = false;
+                let gradeClass = 'failing';
+                
+                if (percentage >= 90) {
+                    grade = 'A+';
+                    passed = true;
+                    gradeClass = 'passing';
+                } else if (percentage >= 80) {
+                    grade = 'A';
+                    passed = true;
+                    gradeClass = 'passing';
+                } else if (percentage >= 70) {
+                    grade = 'B';
+                    passed = true;
+                    gradeClass = 'passing';
+                } else if (percentage >= 60) {
+                    grade = 'C';
+                    passed = true;
+                    gradeClass = 'passing';
+                } else if (percentage >= 40) {
+                    grade = 'D';
+                    passed = true;
+                    gradeClass = 'passing';
+                }
+                
+                $('#gradeText').text(grade);
+                $('#gradeDisplay').removeClass('passing failing').addClass(gradeClass);
+                $('#hiddenGrade').val(grade);
+                
+                $('#statusText').text(passed ? 'PASSED' : 'FAILED');
+                $('#statusDisplay').removeClass('passing failing').addClass(gradeClass);
+                $('#hiddenIsPassed').val(passed);
+            }
+            
+            function updateProgress() {
+                let progress = 0;
+                if ($('#studentSelect').val()) progress += 33;
+                if ($('#classSelect').val()) progress += 33;
+                if ($('#percentageInput').val()) progress += 34;
+                
+                $('.progress-bar').css('width', progress + '%');
+            }
+            
+            function validateForm() {
+                const isValid = $('#studentSelect').val() && 
+                               $('#classSelect').val() && 
+                               $('#percentageInput').val() !== '' &&
+                               parseFloat($('#percentageInput').val()) >= 0 &&
+                               parseFloat($('#percentageInput').val()) <= 100;
+                
+                $('#submitBtn').prop('disabled', !isValid);
+                
+                if (isValid) {
+                    $('#submitBtn').removeClass('btn-secondary').addClass('btn-success');
+                } else {
+                    $('#submitBtn').removeClass('btn-success').addClass('btn-secondary');
+                }
+            }
+            
+            // Form submission
+            $('#examForm').submit(function(e) {
+                const percentage = parseFloat($('#percentageInput').val());
+                if (percentage < 0 || percentage > 100) {
+                    e.preventDefault();
+                    alert('Please enter a percentage between 0 and 100.');
+                    return false;
+                }
+                
+                // Show loading state
+                $('#submitBtn').html('<i class="fas fa-spinner fa-spin me-2"></i>Recording Result...').prop('disabled', true);
+            });
+            
+            // Initial validation
+            validateForm();
+        });
+    </script>
+}

@@ -1,0 +1,35 @@
+@{
+    Layout = "~/Views/Shared/_AuthLayout.cshtml";
+    ViewData["Title"] = "Welcome";
+}
+
+<div class="text-center">
+    <div class="alert alert-success" role="alert">
+        <h4 class="alert-heading"><i class="fas fa-rocket me-2"></i>Welcome to EduManage!</h4>
+        <p>Your student management system is ready to use.</p>
+        <hr>
+        <p class="mb-0">Please create an account to get started.</p>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-sm-6">
+            <a asp-controller="Account" asp-action="Register" class="btn btn-primary btn-lg w-100">
+                <i class="fas fa-user-plus me-2"></i>
+                Create Account
+            </a>
+        </div>
+        <div class="col-sm-6">
+            <a asp-controller="Account" asp-action="Login" class="btn btn-outline-primary btn-lg w-100">
+                <i class="fas fa-sign-in-alt me-2"></i>
+                Login
+            </a>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <small class="text-muted">
+            <strong>System Features:</strong><br>
+            Student Management • Class Organization • Exam Results • Reports & Analytics
+        </small>
+    </div>
+</div>

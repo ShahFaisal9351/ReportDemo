@@ -84,6 +84,80 @@ namespace ReportDemo.Controllers
             return View(classInfo.Students.ToList());
         }
 
+        // ------------------- Create - GET ------------------- //
+        public async Task<IActionResult> Create()
+        {
+            ViewBag.Students = await _context.Students
+                .Include(s => s.Class)
+                .OrderBy(s => s.FullName)
+                .ToListAsync();
+            
+            ViewBag.Classes = await _context.Classes
+                .OrderBy(c => c.ClassName)
+                .ThenBy(c => c.Section)
+                .ToListAsync();
+            
+            var examResult = new ExamResult
+            {
+                AcademicYear = GetCurrentAcademicYear(),
+                Term = "Final",
+                ExamDate = DateTime.UtcNow
+            };
+            
+            return View(examResult);
+        }
+        
+        // ------------------- Create - POST ------------------- //
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(ExamResult examResult)
+        {
+            if (ModelState.IsValid)
+            {
+                // Calculate grade based on percentage
+                examResult.Grade = CalculateGrade(examResult.Percentage);
+                examResult.IsPassed = examResult.Percentage >= 40; // 40% passing grade
+                examResult.ExamCompleted = true;
+                examResult.CreatedAt = DateTime.UtcNow;
+                examResult.UpdatedAt = DateTime.UtcNow;
+
+                // Check if result already exists
+                var existingResult = await _context.ExamResults
+                    .FirstOrDefaultAsync(e => e.StudentId == examResult.StudentId 
+                                            && e.ClassId == examResult.ClassId 
+                                            && e.AcademicYear == examResult.AcademicYear 
+                                            && e.Term == examResult.Term);
+
+                if (existingResult != null)
+                {
+                    ModelState.AddModelError("", "Exam result already exists for this student in the selected term and academic year.");
+                }
+                else
+                {
+                    _context.Add(examResult);
+                    await _context.SaveChangesAsync();
+
+                    var student = await _context.Students.FindAsync(examResult.StudentId);
+                    TempData["SuccessMessage"] = $"Exam result recorded successfully for {student?.FullName}. Grade: {examResult.Grade} ({examResult.Percentage}%)"; 
+                    
+                    return RedirectToAction(nameof(Index));
+                }
+            }
+
+            // Repopulate ViewBag on error
+            ViewBag.Students = await _context.Students
+                .Include(s => s.Class)
+                .OrderBy(s => s.FullName)
+                .ToListAsync();
+            
+            ViewBag.Classes = await _context.Classes
+                .OrderBy(c => c.ClassName)
+                .ThenBy(c => c.Section)
+                .ToListAsync();
+            
+            return View(examResult);
+        }
+
         // ------------------- Record Exam Result ------------------- //
         public async Task<IActionResult> RecordResult(int studentId, int classId)
         {
@@ -287,6 +361,155 @@ namespace ReportDemo.Controllers
                 >= 40 => "D",
                 _ => "F"
             };
+        }
+        
+        // ------------------- Details ------------------- //
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var examResult = await _context.ExamResults
+                .Include(e => e.Student)
+                .Include(e => e.Class)
+                .FirstOrDefaultAsync(m => m.Id == id);
+                
+            if (examResult == null)
+            {
+                return NotFound();
+            }
+
+            return View(examResult);
+        }
+        
+        // ------------------- Edit - GET ------------------- //
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var examResult = await _context.ExamResults.FindAsync(id);
+            if (examResult == null)
+            {
+                return NotFound();
+            }
+            
+            ViewBag.Students = await _context.Students
+                .Include(s => s.Class)
+                .OrderBy(s => s.FullName)
+                .ToListAsync();
+            
+            ViewBag.Classes = await _context.Classes
+                .OrderBy(c => c.ClassName)
+                .ThenBy(c => c.Section)
+                .ToListAsync();
+                
+            return View(examResult);
+        }
+
+        // ------------------- Edit - POST ------------------- //
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, ExamResult examResult)
+        {
+            if (id != examResult.Id)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    // Calculate grade based on percentage
+                    examResult.Grade = CalculateGrade(examResult.Percentage);
+                    examResult.IsPassed = examResult.Percentage >= 40;
+                    examResult.ExamCompleted = true;
+                    examResult.UpdatedAt = DateTime.UtcNow;
+                    
+                    _context.Update(examResult);
+                    await _context.SaveChangesAsync();
+                    
+                    TempData["SuccessMessage"] = "Exam result updated successfully.";
+                    return RedirectToAction(nameof(Details), new { id = examResult.Id });
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!ExamResultExists(examResult.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+            }
+            
+            ViewBag.Students = await _context.Students
+                .Include(s => s.Class)
+                .OrderBy(s => s.FullName)
+                .ToListAsync();
+            
+            ViewBag.Classes = await _context.Classes
+                .OrderBy(c => c.ClassName)
+                .ThenBy(c => c.Section)
+                .ToListAsync();
+                
+            return View(examResult);
+        }
+
+        // ------------------- Delete - POST ------------------- //
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var examResult = await _context.ExamResults.FindAsync(id);
+            if (examResult != null)
+            {
+                _context.ExamResults.Remove(examResult);
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Exam result deleted successfully.";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Exam result not found.";
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+        
+        private bool ExamResultExists(int id)
+        {
+            return _context.ExamResults.Any(e => e.Id == id);
+        }
+        
+        // ------------------- Bulk Record Results ------------------- //
+        public async Task<IActionResult> BulkRecordResults()
+        {
+            ViewBag.Students = await _context.Students
+                .Include(s => s.Class)
+                .OrderBy(s => s.FullName)
+                .ToListAsync();
+            
+            ViewBag.Classes = await _context.Classes
+                .OrderBy(c => c.ClassName)
+                .ThenBy(c => c.Section)
+                .ToListAsync();
+                
+            return View();
+        }
+        
+        // ------------------- Exam Reports ------------------- //
+        public async Task<IActionResult> ExamReports()
+        {
+            // For now, redirect to Index - you can implement detailed reports later
+            TempData["InfoMessage"] = "Exam reports feature coming soon! Currently showing all exam results.";
+            return RedirectToAction(nameof(Index));
         }
     }
 }
