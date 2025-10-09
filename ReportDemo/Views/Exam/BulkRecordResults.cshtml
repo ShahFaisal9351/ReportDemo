@@ -1,3 +1,5 @@
+@model List<ReportDemo.Models.ExamResult>
+
 @{
     ViewData["Title"] = "Bulk Record Results";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -11,7 +13,7 @@
                 <div class="col-sm-6">
                     <h1>
                         <i class="fas fa-upload text-primary"></i>
-                        Bulk Record Results
+                        Bulk Record Results - @ViewBag.Class.ClassName @ViewBag.Class.Section
                     </h1>
                 </div>
                 <div class="col-sm-6">
@@ -31,475 +33,211 @@
             <!-- Info Alert -->
             <div class="alert alert-info alert-dismissible fade show" role="alert">
                 <h5><i class="icon fas fa-info-circle"></i> Bulk Entry Made Easy!</h5>
-                Select a class and exam details, then enter results for multiple students at once. 
+                Enter exam results for all students in <strong>@ViewBag.Class.ClassName @ViewBag.Class.Section</strong>. 
                 Grades will be calculated automatically based on percentages.
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
 
-            <div class="row">
-                <!-- Configuration Panel -->
-                <div class="col-md-4">
-                    <div class="card card-primary card-outline">
-                        <div class="card-header">
-                            <h3 class="card-title">
-                                <i class="fas fa-cog mr-2"></i>
-                                Exam Configuration
-                            </h3>
-                        </div>
+            <!-- Class Info -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="card card-info">
                         <div class="card-body">
-                            <form id="examConfigForm">
-                                <div class="form-group">
-                                    <label class="form-label">
-                                        <i class="fas fa-chalkboard text-primary mr-1"></i>
-                                        Class *
-                                    </label>
-                                    <select id="classSelect" class="form-control select2" style="width: 100%;" required>
-                                        <option value="">-- Select Class --</option>
-                                        @if (ViewBag.Classes != null)
-                                        {
-                                            @foreach (var cls in ViewBag.Classes)
-                                            {
-                                                <option value="@cls.Id">Class @cls.ClassName - @cls.Section</option>
-                                            }
-                                        }
-                                    </select>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <strong>Class:</strong> @ViewBag.Class.ClassName @ViewBag.Class.Section
                                 </div>
-
-                                <div class="form-group">
-                                    <label class="form-label">
-                                        <i class="fas fa-calendar text-success mr-1"></i>
-                                        Academic Year *
-                                    </label>
-                                    <input type="text" id="academicYear" class="form-control" value="2024-25" required />
+                                <div class="col-md-3">
+                                    <strong>Academic Year:</strong> @ViewBag.AcademicYear
                                 </div>
-
-                                <div class="form-group">
-                                    <label class="form-label">
-                                        <i class="fas fa-clock text-warning mr-1"></i>
-                                        Term *
-                                    </label>
-                                    <select id="termSelect" class="form-control" required>
-                                        <option value="">-- Select Term --</option>
-                                        <option value="Mid-Term">Mid-Term</option>
-                                        <option value="Final">Final</option>
-                                        <option value="Quarterly">Quarterly</option>
-                                        <option value="Unit Test">Unit Test</option>
-                                    </select>
+                                <div class="col-md-3">
+                                    <strong>Students:</strong> @Model.Count
                                 </div>
-
-                                <div class="form-group">
-                                    <label class="form-label">
-                                        <i class="fas fa-calendar-day text-info mr-1"></i>
-                                        Exam Date *
-                                    </label>
-                                    <input type="date" id="examDate" class="form-control" required />
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="form-label">
-                                        <i class="fas fa-user text-secondary mr-1"></i>
-                                        Conducted By
-                                    </label>
-                                    <input type="text" id="conductedBy" class="form-control" placeholder="Teacher name (optional)" />
-                                </div>
-
-                                <button type="button" id="loadStudentsBtn" class="btn btn-primary btn-block">
-                                    <i class="fas fa-users mr-2"></i>
-                                    Load Students
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-
-                    <!-- Quick Actions -->
-                    <div class="card card-secondary card-outline">
-                        <div class="card-header">
-                            <h3 class="card-title">
-                                <i class="fas fa-magic mr-2"></i>
-                                Quick Actions
-                            </h3>
-                        </div>
-                        <div class="card-body">
-                            <button type="button" id="fillSampleBtn" class="btn btn-outline-info btn-sm btn-block mb-2">
-                                <i class="fas fa-flask mr-1"></i> Fill Sample Data
-                            </button>
-                            <button type="button" id="clearAllBtn" class="btn btn-outline-warning btn-sm btn-block mb-2">
-                                <i class="fas fa-eraser mr-1"></i> Clear All Results
-                            </button>
-                            <button type="button" id="markAllPassBtn" class="btn btn-outline-success btn-sm btn-block mb-2">
-                                <i class="fas fa-check-circle mr-1"></i> Mark All Pass (60%)
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Results Entry Panel -->
-                <div class="col-md-8">
-                    <div class="card card-success card-outline">
-                        <div class="card-header">
-                            <h3 class="card-title">
-                                <i class="fas fa-list-alt mr-2"></i>
-                                Student Results Entry
-                            </h3>
-                            <div class="card-tools">
-                                <span class="badge badge-info" id="studentCount">0 students</span>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <div id="noStudentsMessage" class="alert alert-warning text-center">
-                                <i class="fas fa-users fa-2x mb-2 text-muted"></i>
-                                <h5>No Students Loaded</h5>
-                                <p class="mb-0">Please select a class and click "Load Students" to begin entering results.</p>
-                            </div>
-
-                            <div id="studentsTable" style="display: none;">
-                                <div class="table-responsive">
-                                    <table class="table table-striped table-hover">
-                                        <thead class="bg-primary">
-                                            <tr>
-                                                <th width="5%">#</th>
-                                                <th width="25%">Student Name</th>
-                                                <th width="15%">Roll Number</th>
-                                                <th width="15%">Percentage</th>
-                                                <th width="10%">Grade</th>
-                                                <th width="10%">Status</th>
-                                                <th width="20%">Remarks</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="studentsTableBody">
-                                            <!-- Students will be loaded here dynamically -->
-                                        </tbody>
-                                    </table>
-                                </div>
-
-                                <div class="mt-3 text-center">
-                                    <button type="button" id="saveAllBtn" class="btn btn-success btn-lg" style="display: none;">
-                                        <i class="fas fa-save mr-2"></i>
-                                        Save All Results
-                                    </button>
+                                <div class="col-md-3">
+                                    <a href="@Url.Action("Index")" class="btn btn-secondary">
+                                        <i class="fas fa-arrow-left mr-1"></i> Back to Results
+                                    </a>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <!-- Bulk Results Form -->
+            <form asp-action="BulkRecordResults" method="post">
+                <input type="hidden" name="classId" value="@ViewBag.Class.Id" />
+                
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-users mr-2"></i>
+                            Enter Results for All Students
+                        </h3>
+                        <div class="card-tools">
+                            <button type="button" id="fillSampleBtn" class="btn btn-info btn-sm">
+                                <i class="fas fa-flask mr-1"></i> Fill Sample
+                            </button>
+                            <button type="button" id="clearAllBtn" class="btn btn-warning btn-sm">
+                                <i class="fas fa-eraser mr-1"></i> Clear All
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <th width="5%">#</th>
+                                        <th width="25%">Student Name</th>
+                                        <th width="15%">Roll Number</th>
+                                        <th width="15%">Percentage</th>
+                                        <th width="10%">Grade</th>
+                                        <th width="10%">Status</th>
+                                        <th width="20%">Remarks</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (int i = 0; i < Model.Count; i++)
+                                    {
+                                        <tr>
+                                            <td>@(i + 1)</td>
+                                            <td>
+                                                <strong>@Model[i].Student.FullName</strong>
+                                                <input type="hidden" name="[@i].StudentId" value="@Model[i].StudentId" />
+                                                <input type="hidden" name="[@i].Id" value="@Model[i].Id" />
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-secondary">@Model[i].Student.RollNumber</span>
+                                            </td>
+                                            <td>
+                                                <input type="number" 
+                                                       name="[@i].Percentage" 
+                                                       value="@Model[i].Percentage" 
+                                                       class="form-control percentage-input"
+                                                       min="0" 
+                                                       max="100" 
+                                                       step="0.1" 
+                                                       data-index="@i" />
+                                            </td>
+                                            <td>
+                                                <span class="grade-display badge" data-index="@i">@Model[i].Grade</span>
+                                            </td>
+                                            <td>
+                                                <span class="status-display badge" data-index="@i">
+                                                    @(Model[i].IsPassed ? "Pass" : "Fail")
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <input type="text" 
+                                                       name="[@i].Remarks" 
+                                                       value="@Model[i].Remarks" 
+                                                       class="form-control form-control-sm"
+                                                       placeholder="Optional" />
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <button type="submit" class="btn btn-success btn-lg">
+                                    <i class="fas fa-save mr-2"></i>
+                                    Save All Results
+                                </button>
+                            </div>
+                            <div class="col-md-6 text-right">
+                                <a href="@Url.Action("Index")" class="btn btn-secondary btn-lg">
+                                    <i class="fas fa-times mr-2"></i>
+                                    Cancel
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
         </div>
     </section>
 </div>
 
 @section Scripts {
-    <!-- Select2 -->
-    <script src="~/lib/adminlte3/plugins/select2/js/select2.full.min.js"></script>
-    
-    <!-- SweetAlert2 -->
-    <script src="~/lib/adminlte3/plugins/sweetalert2/sweetalert2.min.js"></script>
-
     <script>
         $(document).ready(function() {
-            // Initialize Select2
-            $('.select2').select2({
-                theme: 'bootstrap4'
-            });
-
-            // Set default exam date to today
-            const today = new Date().toISOString().split('T')[0];
-            $('#examDate').val(today);
-
-            let studentsData = [];
-
-            // Load Students Button Click
-            $('#loadStudentsBtn').click(function() {
-                const classId = $('#classSelect').val();
-                const academicYear = $('#academicYear').val();
-                const term = $('#termSelect').val();
-                const examDate = $('#examDate').val();
-
-                if (!classId || !academicYear || !term || !examDate) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Missing Information',
-                        text: 'Please fill in all required fields before loading students.',
-                        confirmButtonColor: '#007bff'
-                    });
-                    return;
-                }
-
-                // Simulate loading students (you can replace this with actual AJAX call)
-                loadStudentsForClass(classId);
-            });
-
-            // Function to simulate loading students
-            function loadStudentsForClass(classId) {
-                // Show loading
-                Swal.fire({
-                    title: 'Loading Students...',
-                    text: 'Please wait while we fetch students for the selected class.',
-                    allowOutsideClick: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    }
-                });
-
-                // Simulate students data (replace with actual AJAX call to get students)
-                setTimeout(() => {
-                    studentsData = [
-                        { id: 1, name: 'John Doe', rollNumber: '001', percentage: 0, grade: 'F', status: 'Fail', remarks: '' },
-                        { id: 2, name: 'Jane Smith', rollNumber: '002', percentage: 0, grade: 'F', status: 'Fail', remarks: '' },
-                        { id: 3, name: 'Mike Johnson', rollNumber: '003', percentage: 0, grade: 'F', status: 'Fail', remarks: '' },
-                        { id: 4, name: 'Sarah Wilson', rollNumber: '004', percentage: 0, grade: 'F', status: 'Fail', remarks: '' },
-                        { id: 5, name: 'David Brown', rollNumber: '005', percentage: 0, grade: 'F', status: 'Fail', remarks: '' }
-                    ];
-                    
-                    renderStudentsTable();
-                    Swal.close();
-                }, 1000);
-            }
-
-            // Render students table
-            function renderStudentsTable() {
-                let tableBody = '';
-                
-                studentsData.forEach((student, index) => {
-                    const statusClass = student.status === 'Pass' ? 'text-success' : 'text-danger';
-                    const gradeClass = student.grade === 'F' ? 'text-danger' : 'text-success';
-                    
-                    tableBody += `
-                        <tr>
-                            <td>${index + 1}</td>
-                            <td><strong>${student.name}</strong></td>
-                            <td><span class="badge badge-secondary">${student.rollNumber}</span></td>
-                            <td>
-                                <input type="number" 
-                                       class="form-control percentage-input" 
-                                       data-student-id="${student.id}"
-                                       value="${student.percentage}" 
-                                       min="0" 
-                                       max="100" 
-                                       step="0.01" 
-                                       placeholder="0.00">
-                            </td>
-                            <td>
-                                <span class="badge badge-primary grade-display ${gradeClass}" data-student-id="${student.id}">
-                                    ${student.grade}
-                                </span>
-                            </td>
-                            <td>
-                                <span class="badge status-display ${statusClass}" data-student-id="${student.id}">
-                                    ${student.status}
-                                </span>
-                            </td>
-                            <td>
-                                <input type="text" 
-                                       class="form-control form-control-sm remarks-input" 
-                                       data-student-id="${student.id}"
-                                       value="${student.remarks}" 
-                                       placeholder="Optional">
-                            </td>
-                        </tr>
-                    `;
-                });
-
-                $('#studentsTableBody').html(tableBody);
-                $('#noStudentsMessage').hide();
-                $('#studentsTable').show();
-                $('#saveAllBtn').show();
-                $('#studentCount').text(`${studentsData.length} students`);
-
-                // Attach event listeners to percentage inputs
-                attachPercentageInputListeners();
-            }
-
-            // Attach percentage input listeners
-            function attachPercentageInputListeners() {
-                $('.percentage-input').on('input', function() {
-                    const studentId = $(this).data('student-id');
-                    const percentage = parseFloat($(this).val()) || 0;
-                    
-                    updateStudentGradeAndStatus(studentId, percentage);
-                });
-            }
-
-            // Update student grade and status
-            function updateStudentGradeAndStatus(studentId, percentage) {
-                const grade = calculateGrade(percentage);
-                const status = percentage >= 40 ? 'Pass' : 'Fail';
-                const statusClass = status === 'Pass' ? 'badge-success' : 'badge-danger';
-                const gradeClass = grade === 'F' ? 'text-danger' : 'text-success';
-
-                // Update displays
-                $(`.grade-display[data-student-id="${studentId}"]`)
-                    .text(grade)
-                    .removeClass('text-success text-danger')
-                    .addClass(gradeClass);
-                
-                $(`.status-display[data-student-id="${studentId}"]`)
-                    .text(status)
-                    .removeClass('badge-success badge-danger')
-                    .addClass(statusClass);
-
-                // Update data
-                const student = studentsData.find(s => s.id == studentId);
-                if (student) {
-                    student.percentage = percentage;
-                    student.grade = grade;
-                    student.status = status;
-                }
-            }
-
             // Calculate grade function
             function calculateGrade(percentage) {
                 if (percentage >= 90) return 'A+';
                 if (percentage >= 80) return 'A';
-                if (percentage >= 70) return 'B+';
-                if (percentage >= 60) return 'B';
-                if (percentage >= 50) return 'C+';
-                if (percentage >= 40) return 'C';
-                if (percentage >= 33) return 'D';
+                if (percentage >= 70) return 'B';
+                if (percentage >= 60) return 'C';
+                if (percentage >= 40) return 'D';
                 return 'F';
             }
 
-            // Quick Action Buttons
+            // Update grade and status when percentage changes
+            $('.percentage-input').on('input', function() {
+                const index = $(this).data('index');
+                const percentage = parseFloat($(this).val()) || 0;
+                const grade = calculateGrade(percentage);
+                const status = percentage >= 40 ? 'Pass' : 'Fail';
+                
+                // Update grade display
+                const gradeDisplay = $(`.grade-display[data-index="${index}"]`);
+                gradeDisplay.text(grade);
+                gradeDisplay.removeClass('badge-success badge-danger');
+                gradeDisplay.addClass(grade === 'F' ? 'badge-danger' : 'badge-success');
+                
+                // Update status display
+                const statusDisplay = $(`.status-display[data-index="${index}"]`);
+                statusDisplay.text(status);
+                statusDisplay.removeClass('badge-success badge-danger');
+                statusDisplay.addClass(status === 'Pass' ? 'badge-success' : 'badge-danger');
+            });
+
+            // Fill Sample Data button
             $('#fillSampleBtn').click(function() {
-                if (studentsData.length === 0) return;
-                
-                studentsData.forEach(student => {
+                $('.percentage-input').each(function() {
                     const randomPercentage = Math.floor(Math.random() * 40) + 40; // 40-80%
-                    $(`.percentage-input[data-student-id="${student.id}"]`).val(randomPercentage).trigger('input');
+                    $(this).val(randomPercentage).trigger('input');
                 });
             });
 
+            // Clear All button
             $('#clearAllBtn').click(function() {
-                if (studentsData.length === 0) return;
-                
-                $('.percentage-input').val(0).trigger('input');
-                $('.remarks-input').val('');
+                $('.percentage-input').val('').trigger('input');
+                $('input[name$=".Remarks"]').val('');
             });
 
-            $('#markAllPassBtn').click(function() {
-                if (studentsData.length === 0) return;
-                
-                $('.percentage-input').val(60).trigger('input');
-            });
-
-            // Save All Results
-            $('#saveAllBtn').click(function() {
-                if (studentsData.length === 0) return;
-
-                // Collect all data
-                const results = [];
-                studentsData.forEach(student => {
-                    const percentage = parseFloat($(`.percentage-input[data-student-id="${student.id}"]`).val()) || 0;
-                    const remarks = $(`.remarks-input[data-student-id="${student.id}"]`).val();
-                    
-                    results.push({
-                        studentId: student.id,
-                        classId: $('#classSelect').val(),
-                        academicYear: $('#academicYear').val(),
-                        term: $('#termSelect').val(),
-                        examDate: $('#examDate').val(),
-                        percentage: percentage,
-                        grade: calculateGrade(percentage),
-                        isPassed: percentage >= 40,
-                        examCompleted: true,
-                        remarks: remarks,
-                        conductedBy: $('#conductedBy').val()
-                    });
-                });
-
-                // Show confirmation
-                Swal.fire({
-                    title: 'Save Results?',
-                    text: `You are about to save results for ${results.length} students.`,
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonColor: '#28a745',
-                    cancelButtonColor: '#6c757d',
-                    confirmButtonText: 'Yes, Save All!',
-                    cancelButtonText: 'Cancel'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // Show loading
-                        Swal.fire({
-                            title: 'Saving Results...',
-                            text: 'Please wait while we save all exam results.',
-                            allowOutsideClick: false,
-                            didOpen: () => {
-                                Swal.showLoading();
-                            }
-                        });
-
-                        // Simulate save (replace with actual AJAX call)
-                        setTimeout(() => {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Results Saved!',
-                                text: `Successfully saved results for ${results.length} students.`,
-                                confirmButtonColor: '#007bff'
-                            }).then(() => {
-                                window.location.href = '/Exam';
-                            });
-                        }, 2000);
-                    }
-                });
+            // Trigger initial calculation for existing values
+            $('.percentage-input').each(function() {
+                if ($(this).val()) {
+                    $(this).trigger('input');
+                }
             });
         });
     </script>
 }
 
-@section Styles {
-    <!-- Select2 -->
-    <link rel="stylesheet" href="~/lib/adminlte3/plugins/select2/css/select2.min.css">
-    <link rel="stylesheet" href="~/lib/adminlte3/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css">
+<style>
+    .percentage-input {
+        text-align: center;
+        font-weight: 600;
+    }
     
-    <!-- SweetAlert2 -->
-    <link rel="stylesheet" href="~/lib/adminlte3/plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css">
-
-    <style>
-        .card {
-            border-radius: 0.5rem;
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-        }
-        
-        .form-control:focus {
-            border-color: #007bff;
-            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-        }
-        
-        .table th {
-            font-weight: 600;
-            border-top: none;
-        }
-        
-        .percentage-input {
-            text-align: center;
-            font-weight: 600;
-        }
-        
-        .grade-display {
-            font-size: 0.9rem;
-            font-weight: bold;
-        }
-        
-        .status-display {
-            font-size: 0.8rem;
-        }
-        
-        .alert {
-            border-radius: 0.5rem;
-        }
-        
-        .btn {
-            border-radius: 0.5rem;
-        }
-        
-        .table-responsive {
-            border-radius: 0.5rem;
-        }
-        
-        .remarks-input {
-            font-size: 0.875rem;
-        }
-    </style>
-}
+    .grade-display, .status-display {
+        font-size: 0.9rem;
+        font-weight: bold;
+    }
+    
+    .table th {
+        font-weight: 600;
+    }
+    
+    .card {
+        border-radius: 0.5rem;
+    }
+</style>

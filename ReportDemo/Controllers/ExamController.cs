@@ -89,7 +89,8 @@ namespace ReportDemo.Controllers
         {
             ViewBag.Students = await _context.Students
                 .Include(s => s.Class)
-                .OrderBy(s => s.FullName)
+                .OrderBy(s => s.FirstName)
+                .ThenBy(s => s.LastName)
                 .ToListAsync();
             
             ViewBag.Classes = await _context.Classes
@@ -147,7 +148,8 @@ namespace ReportDemo.Controllers
             // Repopulate ViewBag on error
             ViewBag.Students = await _context.Students
                 .Include(s => s.Class)
-                .OrderBy(s => s.FullName)
+                .OrderBy(s => s.FirstName)
+                .ThenBy(s => s.LastName)
                 .ToListAsync();
             
             ViewBag.Classes = await _context.Classes
@@ -400,7 +402,8 @@ namespace ReportDemo.Controllers
             
             ViewBag.Students = await _context.Students
                 .Include(s => s.Class)
-                .OrderBy(s => s.FullName)
+                .OrderBy(s => s.FirstName)
+                .ThenBy(s => s.LastName)
                 .ToListAsync();
             
             ViewBag.Classes = await _context.Classes
@@ -452,7 +455,8 @@ namespace ReportDemo.Controllers
             
             ViewBag.Students = await _context.Students
                 .Include(s => s.Class)
-                .OrderBy(s => s.FullName)
+                .OrderBy(s => s.FirstName)
+                .ThenBy(s => s.LastName)
                 .ToListAsync();
             
             ViewBag.Classes = await _context.Classes
@@ -488,21 +492,6 @@ namespace ReportDemo.Controllers
             return _context.ExamResults.Any(e => e.Id == id);
         }
         
-        // ------------------- Bulk Record Results ------------------- //
-        public async Task<IActionResult> BulkRecordResults()
-        {
-            ViewBag.Students = await _context.Students
-                .Include(s => s.Class)
-                .OrderBy(s => s.FullName)
-                .ToListAsync();
-            
-            ViewBag.Classes = await _context.Classes
-                .OrderBy(c => c.ClassName)
-                .ThenBy(c => c.Section)
-                .ToListAsync();
-                
-            return View();
-        }
         
         // ------------------- Exam Reports ------------------- //
         public async Task<IActionResult> ExamReports()
