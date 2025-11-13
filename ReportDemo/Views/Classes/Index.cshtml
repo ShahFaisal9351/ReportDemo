@@ -233,7 +233,7 @@
                                                        class="btn btn-sm btn-outline-info" title="View Details">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
-                                                    <a asp-action="ExamStatus" asp-route-id="@item.Id" 
+                                                    <a asp-controller="Exam" asp-action="ClassExamStatus" asp-route-classId="@item.Id"
                                                        class="btn btn-sm btn-outline-warning" title="Exam Status">
                                                         <i class="fas fa-clipboard-check"></i>
                                                     </a>
@@ -315,7 +315,7 @@
         
         function checkPromotionStatus(classId) {
             // Check if exams are complete, then redirect to detailed promotion view
-            fetch(`/Exam/ExamStatus/${classId}`)
+            fetch(`/Classes/PromotionStatus/${classId}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.canPromote) {
@@ -329,7 +329,7 @@
                 .catch(error => {
                     console.error('Error checking promotion status:', error);
                     // If API fails, redirect to exam status page where they can see details
-                    window.location.href = `/Classes/ExamStatus/${classId}`;
+                    window.location.href = `/Exam/ClassExamStatus?classId=${classId}`;
                 });
         }
         
