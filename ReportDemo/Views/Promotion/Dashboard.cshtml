@@ -1,0 +1,192 @@
+@model List<ReportDemo.Controllers.StudentEligibilityVM>
+@{
+    ViewData["Title"] = "Student Promotion Dashboard";
+    Layout = "_DashboardLayout";
+    var classes = ViewBag.Classes as List<ReportDemo.Models.Class>;
+    var selectedClassId = ViewBag.SelectedClassId as int?;
+    var academicYear = ViewBag.CurrentAcademicYear as string;
+    var classInfo = ViewBag.Class as ReportDemo.Models.Class;
+    bool canPromote = ViewBag.CanPromote as bool? ?? false;
+    var nextClass = ViewBag.NextClass as ReportDemo.Models.Class;
+}
+
+<style>
+    .promo-header { background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%); color:#fff; border-radius: 14px; padding: 22px 26px; box-shadow: 0 8px 30px rgba(59,130,246,.2) }
+    .glass-card { background: rgba(255,255,255,0.85); border: 1px solid rgba(255,255,255,0.4); border-radius: 14px; box-shadow: 0 8px 30px rgba(0,0,0,.06) }
+    .toolbar .btn { border-radius: 10px }
+    .status-badge { border-radius: 20px; font-weight: 600; padding: .35rem .7rem }
+    .status-Eligible { background: #e8f5e9; color: #1b5e20 }
+    .status-Conditional { background: #fff8e1; color: #8d6e00 }
+    .status-Not\ Eligible { background: #ffebee; color: #b71c1c }
+    .sticky-head th { position: sticky; top: 0; z-index: 1 }
+    .soft { box-shadow: 0 2px 10px rgba(0,0,0,.05) }
+    .filter-pill { border-radius: 999px }
+</style>
+
+<div class="container-fluid">
+    <div class="promo-header mb-4">
+        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+            <div>
+                <h3 class="mb-1">📚 Student Promotion Dashboard</h3>
+                <div class="opacity-75">Empowering institutions to manage academic progression effortlessly.</div>
+            </div>
+            <div class="text-end">
+                <div><small>Session</small></div>
+                <div class="fw-semibold">@academicYear</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-4">
+            <div class="glass-card p-3 soft">
+                <h6 class="mb-3 text-muted">Class & Session Selection</h6>
+                <form method="get">
+                    <div class="mb-3">
+                        <label class="form-label">Current Class/Section</label>
+                        <select name="classId" class="form-select" required>
+                            <option value="">Select class...</option>
+                            @foreach (var c in classes)
+                            {
+                                if (selectedClassId == c.Id)
+                                {
+                                    <option value="@c.Id" selected>Class @c.ClassName - Section @c.Section</option>
+                                }
+                                else
+                                {
+                                    <option value="@c.Id">Class @c.ClassName - Section @c.Section</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Academic Year</label>
+                        <input type="text" name="academicYear" class="form-control" value="@academicYear" />
+                        <div class="form-text">Auto-detected. Adjust if needed.</div>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-primary"><i class="bi bi-funnel"></i> Apply</button>
+                        @if (selectedClassId.HasValue)
+                        {
+                            <a class="btn btn-outline-secondary" href="@Url.Action("Dashboard", new { classId = (int?)null })">Clear</a>
+                        }
+                    </div>
+                </form>
+                @if (classInfo != null)
+                {
+                    <hr />
+                    <div class="small text-muted mb-2">Next Class</div>
+                    <div class="fw-semibold">@(nextClass?.DisplayName ?? ("—"))</div>
+                    <div class="mt-3">
+                        <span class="badge bg-@(canPromote ? "success" : "warning")">@(canPromote ? "Ready for Promotion" : "Not Ready")</span>
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="col-lg-8">
+            <div class="glass-card p-3 soft">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
+                    <div class="d-flex gap-2 align-items-center">
+                        <span class="text-muted">Filter:</span>
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-outline-secondary btn-sm filter-pill" data-filter="all">All</button>
+                            <button class="btn btn-outline-success btn-sm filter-pill" data-filter="Eligible">Eligible</button>
+                            <button class="btn btn-outline-warning btn-sm filter-pill" data-filter="Conditional">Conditional</button>
+                            <button class="btn btn-outline-danger btn-sm filter-pill" data-filter="Not Eligible">Not Eligible</button>
+                        </div>
+                    </div>
+                    <div class="toolbar d-flex gap-2">
+                        <button class="btn btn-outline-info btn-sm" id="btnPreview" @(selectedClassId.HasValue ? null : @"disabled")>
+                            <i class="bi bi-eye"></i> Preview Promotion
+                        </button>
+                        <a class="btn btn-outline-secondary btn-sm" id="btnExport" href="@Url.Action("ExportSummary", new { classId = selectedClassId ?? 0, academicYear = academicYear })" @(selectedClassId.HasValue ? null : @"aria-disabled=true tabindex=-1 disabled")>
+                            <i class="bi bi-file-earmark-arrow-down"></i> Export Summary
+                        </a>
+                        <form asp-action="PromoteAll" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="classId" value="@selectedClassId" />
+                            <input type="hidden" name="academicYear" value="@academicYear" />
+                            <button type="submit" class="btn btn-success btn-sm" @(canPromote && selectedClassId.HasValue ? null : @"disabled")>
+                                <i class="bi bi-arrow-up-right-circle"></i> Promote All Eligible
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="table-responsive" style="max-height: 60vh">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light sticky-head">
+                            <tr>
+                                <th>Roll No</th>
+                                <th>Student</th>
+                                <th class="text-center">Result</th>
+                                <th class="text-center">Grade</th>
+                                <th class="text-center">Eligibility</th>
+                                <th>Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentBody">
+                        @foreach (var s in Model)
+                        {
+                            var rowClass = s.Eligibility.Replace(" ", "-");
+                            <tr data-elig="@s.Eligibility">
+                                <td class="fw-semibold">@s.Student.RollNumber</td>
+                                <td>
+                                    <div class="fw-semibold">@s.Student.FullName</div>
+                                    <div class="small text-muted">@s.Student.Email</div>
+                                </td>
+                                <td class="text-center">@(s.Result != null ? s.Result.Percentage.ToString("0.##") : "—")%</td>
+                                <td class="text-center">@s.Result?.Grade</td>
+                                <td class="text-center">
+                                    <span class="status-badge status-@s.Eligibility.Replace(" ", "\u00A0")">@s.Eligibility</span>
+                                </td>
+                                <td class="text-muted">@s.Result?.Remarks</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+
+                @if (!Model.Any())
+                {
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-people display-5 d-block mb-2"></i>
+                        Select a class to view students and promotion readiness.
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    document.querySelectorAll('[data-filter]').forEach(btn => {
+        btn.addEventListener('click', function(e){
+            e.preventDefault();
+            const f = this.getAttribute('data-filter');
+            document.querySelectorAll('#studentBody tr').forEach(tr => {
+                const val = tr.getAttribute('data-elig');
+                tr.style.display = (f === 'all' || val === f) ? '' : 'none';
+            });
+        });
+    });
+
+    const previewBtn = document.getElementById('btnPreview');
+    if (previewBtn) {
+        previewBtn.addEventListener('click', async function(){
+            const classId = '@(selectedClassId ?? 0)';
+            const ay = '@academicYear';
+            if (!classId || classId === '0') return;
+            try {
+                const res = await fetch(`@Url.Action("Preview")?classId=${classId}&academicYear=${encodeURIComponent(ay)}`);
+                const data = await res.json();
+                const msg = `Next Class: ${data.nextClass || '—'}\nReady: ${data.canPromote ? 'Yes' : 'No'}${data.isMatric ? '\nMatric Class: Yes' : ''}`;
+                alert(msg);
+            } catch (e) {
+                alert('Unable to preview right now.');
+            }
+        });
+    }
+</script>
+}
