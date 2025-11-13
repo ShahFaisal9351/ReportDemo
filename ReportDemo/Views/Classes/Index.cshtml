@@ -1,9 +1,25 @@
 @model IEnumerable<ReportDemo.Models.Class>
 
-@{
+@{ 
     ViewData["Title"] = "Class Management - School Management System";
     Layout = "_DashboardLayout";
 }
+
+<style>
+    .card.shadow-sm { border: none; border-radius: 12px; }
+    .card-header { border-top-left-radius: 12px; border-top-right-radius: 12px; }
+    .input-group .form-control { box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
+    .table thead th { position: sticky; top: 0; z-index: 1; }
+    .table-hover tbody tr:hover { background-color: #f8fafc; }
+    .border-left-primary { border-left: .25rem solid #0d6efd; }
+    .border-left-success { border-left: .25rem solid #198754; }
+    .border-left-info { border-left: .25rem solid #0dcaf0; }
+    .border-left-warning { border-left: .25rem solid #ffc107; }
+    .card-title i { margin-right: .5rem; }
+    .btn-group .btn { border-radius: 8px !important; }
+    .badge { border-radius: .5rem; }
+    .stats-number { font-weight: 700; color: #212529; }
+</style>
 
 <div class="container-fluid">
     <div class="row">
@@ -32,9 +48,9 @@
                             <form asp-action="Index" method="get">
                                 <div class="input-group">
                                     <input type="text" name="SearchString" value="@ViewBag.CurrentFilter" 
-                                           placeholder="Search classes, teachers, or rooms..." class="form-control">
+                                           placeholder="Search classes, teachers, or rooms..." class="form-control shadow-sm">
                                     <input type="hidden" name="sortOrder" value="@ViewBag.CurrentSort" />
-                                    <button class="btn btn-outline-primary" type="submit">
+                                    <button class="btn btn-outline-primary shadow-sm" type="submit">
                                         <i class="fas fa-search"></i> Search
                                     </button>
                                 </div>
@@ -132,9 +148,8 @@
 
                     @if (Model.Any())
                     {
-                        <!-- Classes Table -->
                         <div class="table-responsive">
-                            <table class="table table-hover table-striped">
+                            <table class="table table-hover table-striped align-middle">
                                 <thead class="table-dark">
                                     <tr>
                                         <th>
@@ -172,7 +187,7 @@
                                                 <strong class="text-primary">@Html.DisplayFor(modelItem => item.ClassName)</strong>
                                             </td>
                                             <td>
-                                                <span class="badge badge-secondary">@Html.DisplayFor(modelItem => item.Section)</span>
+                                                <span class="badge bg-secondary">@Html.DisplayFor(modelItem => item.Section)</span>
                                             </td>
                                             <td>
                                                 @if (!string.IsNullOrEmpty(item.TeacherInCharge))
@@ -206,7 +221,7 @@
                                                 }
                                                 else
                                                 {
-                                                    <span class="badge badge-light">0</span>
+                                                    <span class="badge bg-light text-dark">0</span>
                                                 }
                                             </td>
                                             <td>
