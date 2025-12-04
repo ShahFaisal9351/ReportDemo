@@ -1,90 +1,498 @@
 @model ReportDemo.Models.UserProfile
 
 @{
-    ViewData["Title"] = "Edit Profile";
+    ViewData["Title"] = "Edit Professional Profile";
+    Layout = "_DashboardLayout";
 }
 
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-md-8 mx-auto">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">
-                        <i class="fas fa-edit"></i> Edit Profile
-                    </h4>
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --card-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        --hover-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+    }
+
+    .edit-header {
+        background: var(--primary-gradient);
+        border-radius: 25px;
+        padding: 3rem;
+        box-shadow: var(--card-shadow);
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 3rem;
+    }
+
+    .edit-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 400px;
+        height: 400px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 50%;
+        animation: float 8s ease-in-out infinite;
+    }
+
+    @@keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-30px) rotate(180deg); }
+    }
+
+    .edit-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: white;
+        margin-bottom: 0.5rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .edit-subtitle {
+        font-size: 1.2rem;
+        color: rgba(255,255,255,0.9);
+        margin-bottom: 0;
+        position: relative;
+        z-index: 2;
+    }
+
+    .edit-card {
+        background: white;
+        border-radius: 25px;
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+        transition: var(--transition-smooth);
+        position: relative;
+    }
+
+    .edit-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--hover-shadow);
+    }
+
+    .upload-section {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 3rem;
+        text-align: center;
+        position: relative;
+    }
+
+    .profile-avatar-container {
+        position: relative;
+        display: inline-block;
+        margin-bottom: 2rem;
+    }
+
+    .profile-avatar {
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 8px solid white;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        transition: var(--transition-smooth);
+    }
+
+    .profile-avatar:hover {
+        transform: scale(1.05);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+    }
+
+    .profile-avatar-placeholder {
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        background: var(--primary-gradient);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 8px solid white;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        transition: var(--transition-smooth);
+    }
+
+    .profile-avatar-placeholder:hover {
+        transform: scale(1.05);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+    }
+
+    .profile-avatar-placeholder i {
+        font-size: 4rem;
+        color: white;
+    }
+
+    .upload-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.7);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: var(--transition-smooth);
+        cursor: pointer;
+    }
+
+    .profile-avatar-container:hover .upload-overlay {
+        opacity: 1;
+    }
+
+    .upload-overlay i {
+        font-size: 2rem;
+        color: white;
+    }
+
+    .file-input-wrapper {
+        position: relative;
+        overflow: hidden;
+        display: inline-block;
+    }
+
+    .file-input-wrapper input[type=file] {
+        position: absolute;
+        left: -9999px;
+    }
+
+    .file-input-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        background: var(--primary-gradient);
+        color: white;
+        border-radius: 50px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+        border: none;
+    }
+
+    .file-input-label:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+
+    .form-section {
+        padding: 3rem;
+    }
+
+    .form-group-modern {
+        margin-bottom: 2rem;
+    }
+
+    .form-label-modern {
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.9rem;
+    }
+
+    .form-control-modern {
+        border: 2px solid #e9ecef;
+        border-radius: 15px;
+        padding: 1rem 1.5rem;
+        font-size: 1rem;
+        transition: var(--transition-smooth);
+        background: #f8f9fa;
+    }
+
+    .form-control-modern:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        background: white;
+        transform: translateY(-2px);
+    }
+
+    .form-control-modern::placeholder {
+        color: #adb5bd;
+        font-style: italic;
+    }
+
+    .btn-professional {
+        border-radius: 50px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: var(--transition-smooth);
+        border: none;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-professional::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: rgba(255,255,255,0.2);
+        transition: left 0.5s ease;
+    }
+
+    .btn-professional:hover::before {
+        left: 100%;
+    }
+
+    .btn-professional:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+
+    .error-alert {
+        background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+        border: none;
+        border-radius: 15px;
+        color: #721c24;
+        padding: 1rem 1.5rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .error-alert::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 5px;
+        height: 100%;
+        background: var(--warning-gradient);
+    }
+
+    .success-alert {
+        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+        border: none;
+        border-radius: 15px;
+        color: #155724;
+        padding: 1rem 1.5rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .success-alert::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 5px;
+        height: 100%;
+        background: var(--success-gradient);
+    }
+
+    .character-count {
+        text-align: right;
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-top: 0.5rem;
+    }
+
+    .upload-progress {
+        margin-top: 1rem;
+        display: none;
+    }
+
+    .progress-bar-modern {
+        height: 8px;
+        border-radius: 50px;
+        background: #e9ecef;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: var(--primary-gradient);
+        border-radius: 50px;
+        transition: width 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .progress-fill::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        animation: shimmer 2s infinite;
+    }
+
+    @@keyframes shimmer {
+        from { transform: translateX(-100%); }
+        to { transform: translateX(100%); }
+    }
+
+    @@media (max-width: 768px) {
+        .edit-header { padding: 2rem; }
+        .edit-title { font-size: 2rem; }
+        .upload-section { padding: 2rem; }
+        .form-section { padding: 2rem; }
+    }
+</style>
+
+<!-- Error Message -->
+@if (TempData["Error"] != null)
+{
+    <div class="error-alert alert-dismissible fade show" role="alert">
+        <div class="d-flex align-items-center">
+            <i class="fas fa-exclamation-triangle me-3" style="font-size: 1.5rem;"></i>
+            <div>
+                <strong>Error!</strong> @TempData["Error"]
+            </div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<!-- Edit Header -->
+<div class="edit-header">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h1 class="edit-title">Edit Profile</h1>
+            <p class="edit-subtitle">Update your professional information and profile picture</p>
+        </div>
+        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+            <div class="text-white">
+                <div class="small opacity-75 mb-1">Profile Status</div>
+                <div class="h5 mb-0">
+                    <i class="fas fa-edit me-2"></i>Editing Mode
                 </div>
-                <div class="card-body">
-                    @if (TempData["Error"] != null)
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Form Card -->
+<div class="edit-card">
+    <div class="row g-0">
+        <!-- Upload Section -->
+        <div class="col-lg-4">
+            <div class="upload-section">
+                <h4 class="mb-4">Profile Picture</h4>
+                
+                <div class="profile-avatar-container">
+                    @if (!string.IsNullOrEmpty(Model.ProfilePicturePath))
                     {
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            @TempData["Error"]
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        <img id="profilePreview" src="@Model.ProfilePicturePath" alt="Profile Picture" class="profile-avatar">
+                    }
+                    else
+                    {
+                        <div id="profilePreview" class="profile-avatar-placeholder">
+                            <i class="fas fa-user"></i>
                         </div>
                     }
-
-                    <form asp-action="Edit" method="post" enctype="multipart/form-data">
-                        <input asp-for="Id" type="hidden" />
-                        <input asp-for="UserId" type="hidden" />
-                        <input asp-for="CreatedAt" type="hidden" />
-                        <input asp-for="ProfilePicturePath" type="hidden" />
-
-                        <div class="row">
-                            <div class="col-md-4 text-center">
-                                <div class="mb-3">
-                                    <label class="form-label"><strong>Profile Picture</strong></label>
-                                    @if (!string.IsNullOrEmpty(Model.ProfilePicturePath))
-                                    {
-                                        <img id="profilePreview" src="@Model.ProfilePicturePath" alt="Profile Picture" class="img-fluid rounded-circle mb-3 d-block mx-auto" style="width: 150px; height: 150px; object-fit: cover;">
-                                    }
-                                    else
-                                    {
-                                        <div id="profilePreview" class="bg-secondary rounded-circle d-flex align-items-center justify-content-center mb-3 mx-auto" style="width: 150px; height: 150px;">
-                                            <i class="fas fa-user fa-4x text-white"></i>
-                                        </div>
-                                    }
-                                    <input type="file" class="form-control" id="profilePicture" name="profilePicture" accept="image/*" onchange="previewImage(this)">
-                                    <small class="form-text text-muted">Choose an image file (JPG, PNG, GIF)</small>
-                                </div>
-                            </div>
-                            <div class="col-md-8">
-                                <div class="mb-3">
-                                    <label asp-for="FirstName" class="form-label"></label>
-                                    <input asp-for="FirstName" class="form-control" placeholder="Enter your first name">
-                                    <span asp-validation-for="FirstName" class="text-danger"></span>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label asp-for="LastName" class="form-label"></label>
-                                    <input asp-for="LastName" class="form-control" placeholder="Enter your last name">
-                                    <span asp-validation-for="LastName" class="text-danger"></span>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label asp-for="PhoneNumber" class="form-label"></label>
-                                    <input asp-for="PhoneNumber" class="form-control" placeholder="Enter your phone number">
-                                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label asp-for="Bio" class="form-label"></label>
-                                    <textarea asp-for="Bio" class="form-control" rows="4" placeholder="Tell us about yourself..."></textarea>
-                                    <span asp-validation-for="Bio" class="text-danger"></span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row mt-4">
-                            <div class="col-12 text-center">
-                                <button type="submit" class="btn btn-primary me-2">
-                                    <i class="fas fa-save"></i> Save Changes
-                                </button>
-                                <a href="@Url.Action("Index", "Profile")" class="btn btn-secondary">
-                                    <i class="fas fa-times"></i> Cancel
-                                </a>
-                            </div>
-                        </div>
-                    </form>
+                    <div class="upload-overlay" onclick="document.getElementById('profilePicture').click()">
+                        <i class="fas fa-camera"></i>
+                    </div>
                 </div>
+
+                <div class="file-input-wrapper">
+                    <input type="file" id="profilePicture" name="profilePicture" accept="image/*" onchange="previewImage(this)">
+                    <label for="profilePicture" class="file-input-label">
+                        <i class="fas fa-upload"></i>
+                        Choose Photo
+                    </label>
+                </div>
+
+                <div class="upload-progress" id="uploadProgress">
+                    <div class="progress-bar-modern">
+                        <div class="progress-fill" style="width: 0%"></div>
+                    </div>
+                    <small class="text-muted mt-1 d-block">Uploading...</small>
+                </div>
+
+                <small class="form-text text-muted d-block mt-3">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Supported formats: JPG, PNG, GIF (Max 5MB)
+                </small>
+            </div>
+        </div>
+
+        <!-- Form Section -->
+        <div class="col-lg-8">
+            <div class="form-section">
+                <form asp-action="Edit" method="post" enctype="multipart/form-data" id="profileForm">
+                    <input asp-for="Id" type="hidden" />
+                    <input asp-for="UserId" type="hidden" />
+                    <input asp-for="CreatedAt" type="hidden" />
+                    <input asp-for="ProfilePicturePath" type="hidden" />
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group-modern">
+                                <label asp-for="FirstName" class="form-label-modern">
+                                    <i class="fas fa-user"></i>
+                                    First Name
+                                </label>
+                                <input asp-for="FirstName" class="form-control-modern" placeholder="Enter your first name">
+                                <span asp-validation-for="FirstName" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group-modern">
+                                <label asp-for="LastName" class="form-label-modern">
+                                    <i class="fas fa-user"></i>
+                                    Last Name
+                                </label>
+                                <input asp-for="LastName" class="form-control-modern" placeholder="Enter your last name">
+                                <span asp-validation-for="LastName" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label asp-for="PhoneNumber" class="form-label-modern">
+                            <i class="fas fa-phone"></i>
+                            Phone Number
+                        </label>
+                        <input asp-for="PhoneNumber" class="form-control-modern" placeholder="+1 (555) 123-4567">
+                        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label asp-for="Bio" class="form-label-modern">
+                            <i class="fas fa-quote-left"></i>
+                            Professional Bio
+                        </label>
+                        <textarea asp-for="Bio" class="form-control-modern" rows="5" placeholder="Tell us about your professional background, experience, and interests..." oninput="updateCharCount(this)"></textarea>
+                        <div class="character-count">
+                            <span id="charCount">0</span> / 500 characters
+                        </div>
+                        <span asp-validation-for="Bio" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-flex gap-3 justify-content-end mt-4">
+                        <a href="@Url.Action("Index", "Profile")" class="btn btn-secondary btn-professional">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary btn-professional">
+                            <i class="fas fa-save me-2"></i>Save Changes
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -94,14 +502,75 @@
     <script>
         function previewImage(input) {
             if (input.files && input.files[0]) {
+                // Show upload progress
+                document.getElementById('uploadProgress').style.display = 'block';
+                
+                // Simulate upload progress
+                let progress = 0;
+                const progressBar = document.querySelector('.progress-fill');
+                const progressInterval = setInterval(() => {
+                    progress += 10;
+                    progressBar.style.width = progress + '%';
+                    if (progress >= 100) {
+                        clearInterval(progressInterval);
+                        setTimeout(() => {
+                            document.getElementById('uploadProgress').style.display = 'none';
+                            progressBar.style.width = '0%';
+                        }, 500);
+                    }
+                }, 100);
+
                 var reader = new FileReader();
                 reader.onload = function (e) {
-                    document.getElementById('profilePreview').innerHTML = 
-                        '<img src="' + e.target.result + '" alt="Profile Picture" class="img-fluid rounded-circle mb-3 d-block mx-auto" style="width: 150px; height: 150px; object-fit: cover;">';
+                    const previewContainer = document.getElementById('profilePreview');
+                    if (previewContainer.tagName === 'DIV') {
+                        // Replace placeholder div with img
+                        previewContainer.outerHTML = 
+                            '<img id="profilePreview" src="' + e.target.result + '" alt="Profile Picture" class="profile-avatar">';
+                    } else {
+                        // Update existing img
+                        previewContainer.src = e.target.result;
+                    }
                 };
                 reader.readAsDataURL(input.files[0]);
             }
         }
+
+        function updateCharCount(textarea) {
+            const charCount = textarea.value.length;
+            const charCountElement = document.getElementById('charCount');
+            charCountElement.textContent = charCount;
+            
+            if (charCount > 500) {
+                charCountElement.style.color = '#dc3545';
+                textarea.value = textarea.value.substring(0, 500);
+                charCountElement.textContent = 500;
+            } else if (charCount > 400) {
+                charCountElement.style.color = '#ffc107';
+            } else {
+                charCountElement.style.color = '#6c757d';
+            }
+        }
+
+        // Initialize character count
+        document.addEventListener('DOMContentLoaded', function() {
+            const bioTextarea = document.querySelector('textarea[name="Bio"]');
+            if (bioTextarea) {
+                updateCharCount(bioTextarea);
+            }
+        });
+
+        // Form validation
+        document.getElementById('profileForm').addEventListener('submit', function(e) {
+            const firstName = document.querySelector('input[name="FirstName"]').value.trim();
+            const lastName = document.querySelector('input[name="LastName"]').value.trim();
+            
+            if (!firstName || !lastName) {
+                e.preventDefault();
+                alert('Please fill in both first name and last name.');
+                return false;
+            }
+        });
     </script>
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }

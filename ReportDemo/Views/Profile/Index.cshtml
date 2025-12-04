@@ -1,70 +1,464 @@
 @model ReportDemo.Models.UserProfile
 
 @{
-    ViewData["Title"] = "My Profile";
+    ViewData["Title"] = "Professional Profile";
+    Layout = "_DashboardLayout";
 }
 
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-md-8 mx-auto">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">
-                        <i class="fas fa-user"></i> My Profile
-                    </h4>
-                </div>
-                <div class="card-body">
-                    @if (TempData["Success"] != null)
-                    {
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            @TempData["Success"]
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    }
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        --card-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        --hover-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
 
-                    <div class="row">
-                        <div class="col-md-4 text-center">
-                            @if (!string.IsNullOrEmpty(Model.ProfilePicturePath))
-                            {
-                                <img src="@Model.ProfilePicturePath" alt="Profile Picture" class="img-fluid rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
-                            }
-                            else
-                            {
-                                <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center mb-3 mx-auto" style="width: 150px; height: 150px;">
-                                    <i class="fas fa-user fa-4x text-white"></i>
-                                </div>
-                            }
-                            <div>
-                                <a href="@Url.Action("Edit", "Profile")" class="btn btn-primary">
-                                    <i class="fas fa-edit"></i> Edit Profile
-                                </a>
-                            </div>
+    body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+    }
+
+    .profile-header {
+        background: var(--primary-gradient);
+        border-radius: 25px;
+        padding: 3rem;
+        box-shadow: var(--card-shadow);
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 3rem;
+    }
+
+    .profile-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 400px;
+        height: 400px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 50%;
+        animation: float 8s ease-in-out infinite;
+    }
+
+    @@keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-30px) rotate(180deg); }
+    }
+
+    .profile-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: white;
+        margin-bottom: 0.5rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .profile-subtitle {
+        font-size: 1.2rem;
+        color: rgba(255,255,255,0.9);
+        margin-bottom: 0;
+        position: relative;
+        z-index: 2;
+    }
+
+    .profile-card {
+        background: white;
+        border-radius: 25px;
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+        transition: var(--transition-smooth);
+        position: relative;
+    }
+
+    .profile-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--hover-shadow);
+    }
+
+    .profile-avatar-section {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 3rem;
+        text-align: center;
+        position: relative;
+    }
+
+    .profile-avatar {
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 8px solid white;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        transition: var(--transition-smooth);
+        position: relative;
+        z-index: 2;
+    }
+
+    .profile-avatar:hover {
+        transform: scale(1.05);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+    }
+
+    .profile-avatar-placeholder {
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        background: var(--primary-gradient);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        border: 8px solid white;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        transition: var(--transition-smooth);
+    }
+
+    .profile-avatar-placeholder:hover {
+        transform: scale(1.05);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+    }
+
+    .profile-avatar-placeholder i {
+        font-size: 4rem;
+        color: white;
+    }
+
+    .profile-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(17, 153, 142, 0.1);
+        color: #11998e;
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-weight: 600;
+        margin-top: 1rem;
+    }
+
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        background: #38ef7d;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+    }
+
+    @@keyframes pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.5; transform: scale(1.5); }
+    }
+
+    .profile-info-section {
+        padding: 3rem;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .info-item {
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 20px;
+        transition: var(--transition-smooth);
+        border-left: 4px solid transparent;
+    }
+
+    .info-item:hover {
+        transform: translateX(5px);
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        border-left-color: #667eea;
+    }
+
+    .info-label {
+        font-size: 0.9rem;
+        color: #6c757d;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .info-value {
+        font-size: 1.1rem;
+        color: #2c3e50;
+        font-weight: 600;
+    }
+
+    .bio-section {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 2rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .bio-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 5px;
+        height: 100%;
+        background: var(--primary-gradient);
+    }
+
+    .bio-text {
+        line-height: 1.8;
+        color: #495057;
+        font-size: 1rem;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-professional {
+        border-radius: 50px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: var(--transition-smooth);
+        border: none;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-professional::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: rgba(255,255,255,0.2);
+        transition: left 0.5s ease;
+    }
+
+    .btn-professional:hover::before {
+        left: 100%;
+    }
+
+    .btn-professional:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-box {
+        text-align: center;
+        padding: 2rem;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        transition: var(--transition-smooth);
+    }
+
+    .stat-box:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--hover-shadow);
+    }
+
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 800;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .stat-label {
+        color: #6c757d;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .success-alert {
+        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+        border: none;
+        border-radius: 15px;
+        color: #155724;
+        padding: 1rem 1.5rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .success-alert::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 5px;
+        height: 100%;
+        background: var(--success-gradient);
+    }
+
+    @@media (max-width: 768px) {
+        .profile-header { padding: 2rem; }
+        .profile-title { font-size: 2rem; }
+        .profile-avatar-section { padding: 2rem; }
+        .profile-info-section { padding: 2rem; }
+        .info-grid { grid-template-columns: 1fr; }
+    }
+</style>
+
+<!-- Success Message -->
+@if (TempData["Success"] != null)
+{
+    <div class="success-alert alert-dismissible fade show" role="alert">
+        <div class="d-flex align-items-center">
+            <i class="fas fa-check-circle me-3" style="font-size: 1.5rem;"></i>
+            <div>
+                <strong>Success!</strong> @TempData["Success"]
+            </div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<!-- Profile Header -->
+<div class="profile-header">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h1 class="profile-title">Professional Profile</h1>
+            <p class="profile-subtitle">Manage your personal information and preferences</p>
+        </div>
+        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+            <div class="profile-status">
+                <div class="status-dot"></div>
+                <span>Profile Active</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Profile Card -->
+<div class="profile-card">
+    <div class="row g-0">
+        <!-- Avatar Section -->
+        <div class="col-lg-4">
+            <div class="profile-avatar-section">
+                @if (!string.IsNullOrEmpty(Model.ProfilePicturePath))
+                {
+                    <img src="@Model.ProfilePicturePath" alt="Profile Picture" class="profile-avatar">
+                }
+                else
+                {
+                    <div class="profile-avatar-placeholder">
+                        <i class="fas fa-user"></i>
+                    </div>
+                }
+                
+                <h4 class="mt-3 mb-1">@(Model.FirstName + " " + Model.LastName)</h4>
+                <p class="text-muted mb-3">Education Professional</p>
+                
+                <div class="action-buttons justify-content-center">
+                    <a href="@Url.Action("Edit", "Profile")" class="btn btn-primary btn-professional">
+                        <i class="fas fa-edit me-2"></i>Edit Profile
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Section -->
+        <div class="col-lg-8">
+            <div class="profile-info-section">
+                <!-- Quick Stats -->
+                <div class="stats-row">
+                    <div class="stat-box">
+                        <div class="stat-number">@Model.CreatedAt.Day</div>
+                        <div class="stat-label">Days Active</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">100%</div>
+                        <div class="stat-label">Complete</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">@Model.UpdatedAt.ToString("MMM")</div>
+                        <div class="stat-label">Last Update</div>
+                    </div>
+                </div>
+
+                <!-- Bio Section -->
+                <div class="bio-section">
+                    <h5 class="mb-3">
+                        <i class="fas fa-quote-left me-2"></i>About Me
+                    </h5>
+                    <p class="bio-text">
+                        @(Model.Bio ?? "No bio provided yet. Click Edit Profile to add your professional bio and let others know more about you.")
+                    </p>
+                </div>
+
+                <!-- Information Grid -->
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">
+                            <i class="fas fa-user"></i>
+                            First Name
                         </div>
-                        <div class="col-md-8">
-                            <div class="row mb-3">
-                                <div class="col-sm-4"><strong>First Name:</strong></div>
-                                <div class="col-sm-8">@(Model.FirstName ?? "Not provided")</div>
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-sm-4"><strong>Last Name:</strong></div>
-                                <div class="col-sm-8">@(Model.LastName ?? "Not provided")</div>
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-sm-4"><strong>Phone:</strong></div>
-                                <div class="col-sm-8">@(Model.PhoneNumber ?? "Not provided")</div>
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-sm-4"><strong>Bio:</strong></div>
-                                <div class="col-sm-8">@(Model.Bio ?? "No bio provided")</div>
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-sm-4"><strong>Member Since:</strong></div>
-                                <div class="col-sm-8">@Model.CreatedAt.ToString("MMMM dd, yyyy")</div>
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-sm-4"><strong>Last Updated:</strong></div>
-                                <div class="col-sm-8">@Model.UpdatedAt.ToString("MMMM dd, yyyy")</div>
-                            </div>
+                        <div class="info-value">@(Model.FirstName ?? "Not provided")</div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-label">
+                            <i class="fas fa-user"></i>
+                            Last Name
+                        </div>
+                        <div class="info-value">@(Model.LastName ?? "Not provided")</div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-label">
+                            <i class="fas fa-phone"></i>
+                            Phone Number
+                        </div>
+                        <div class="info-value">@(Model.PhoneNumber ?? "Not provided")</div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-label">
+                            <i class="fas fa-calendar"></i>
+                            Member Since
+                        </div>
+                        <div class="info-value">@Model.CreatedAt.ToString("MMMM dd, yyyy")</div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-label">
+                            <i class="fas fa-clock"></i>
+                            Last Updated
+                        </div>
+                        <div class="info-value">@Model.UpdatedAt.ToString("MMMM dd, yyyy")</div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-label">
+                            <i class="fas fa-shield-alt"></i>
+                            Account Status
+                        </div>
+                        <div class="info-value">
+                            <span class="badge bg-success">Active</span>
                         </div>
                     </div>
                 </div>

@@ -72,72 +72,63 @@ namespace ReportDemo.Controllers
                 return Forbid();
             }
 
-            if (ModelState.IsValid)
+            try
             {
-                try
+                // Get existing profile from database
+                var existingProfile = await _context.UserProfiles.FirstOrDefaultAsync(p => p.UserId == userId);
+                if (existingProfile == null)
                 {
-                    // Debug: Log form data
-                    Console.WriteLine($"Profile ID: {profile.Id}");
-                    Console.WriteLine($"User ID: {userId}");
-                    Console.WriteLine($"Profile Picture: {profilePicture?.FileName ?? "None"}");
-                    
-                    // Get existing profile from database
-                    var existingProfile = await _context.UserProfiles.FirstOrDefaultAsync(p => p.UserId == userId);
-                    if (existingProfile == null)
+                    // Create new profile if it doesn't exist
+                    existingProfile = new UserProfile
                     {
-                        TempData["Error"] = "Profile not found. Please try again.";
+                        UserId = userId!,
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow
+                    };
+                    _context.UserProfiles.Add(existingProfile);
+                }
+                
+                // Update profile fields
+                existingProfile.FirstName = profile.FirstName?.Trim();
+                existingProfile.LastName = profile.LastName?.Trim();
+                existingProfile.PhoneNumber = profile.PhoneNumber?.Trim();
+                existingProfile.Bio = profile.Bio?.Trim();
+                existingProfile.UpdatedAt = DateTime.UtcNow;
+                
+                // Handle profile picture upload
+                if (profilePicture != null && profilePicture.Length > 0)
+                {
+                    var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads", "profiles");
+                    Directory.CreateDirectory(uploadsFolder);
+                    
+                    // Validate file type
+                    var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+                    var fileExtension = Path.GetExtension(profilePicture.FileName).ToLowerInvariant();
+                    
+                    if (!allowedExtensions.Contains(fileExtension))
+                    {
+                        TempData["Error"] = "Only JPG, PNG, GIF, and WebP files are allowed.";
                         return View(profile);
                     }
                     
-                    // Update profile fields
-                    existingProfile.FirstName = profile.FirstName;
-                    existingProfile.LastName = profile.LastName;
-                    existingProfile.PhoneNumber = profile.PhoneNumber;
-                    existingProfile.Bio = profile.Bio;
-                    existingProfile.UpdatedAt = DateTime.UtcNow;
-                    
-                    // Handle profile picture upload
-                    if (profilePicture != null && profilePicture.Length > 0)
+                    // Validate file size (max 5MB)
+                    if (profilePicture.Length > 5 * 1024 * 1024)
                     {
-                        Console.WriteLine($"Processing profile picture: {profilePicture.FileName}, Size: {profilePicture.Length} bytes");
-                        
-                        var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads", "profiles");
-                        Directory.CreateDirectory(uploadsFolder);
-                        
-                        // Validate file type
-                        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
-                        var fileExtension = Path.GetExtension(profilePicture.FileName).ToLowerInvariant();
-                        
-                        if (!allowedExtensions.Contains(fileExtension))
-                        {
-                            TempData["Error"] = "Only JPG, PNG, and GIF files are allowed.";
-                            return View(profile);
-                        }
-                        
-                        // Validate file size (max 5MB)
-                        if (profilePicture.Length > 5 * 1024 * 1024)
-                        {
-                            TempData["Error"] = "File size cannot exceed 5MB.";
-                            return View(profile);
-                        }
+                        TempData["Error"] = "File size cannot exceed 5MB.";
+                        return View(profile);
+                    }
 
-                        var uniqueFileName = Guid.NewGuid().ToString() + fileExtension;
-                        var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-                        
-                        Console.WriteLine($"Saving to: {filePath}");
+                    var uniqueFileName = Guid.NewGuid().ToString() + fileExtension;
+                    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
-                        using (var stream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await profilePicture.CopyToAsync(stream);
-                        }
-                        
-                        // Verify file was saved
-                        if (!System.IO.File.Exists(filePath))
-                        {
-                            TempData["Error"] = "Failed to save profile picture.";
-                            return View(profile);
-                        }
-
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await profilePicture.CopyToAsync(stream);
+                    }
+                    
+                    // Verify file was saved
+                    if (System.IO.File.Exists(filePath))
+                    {
                         // Delete old profile picture if it exists
                         if (!string.IsNullOrEmpty(existingProfile.ProfilePicturePath))
                         {
@@ -149,26 +140,29 @@ namespace ReportDemo.Controllers
                         }
 
                         existingProfile.ProfilePicturePath = "/uploads/profiles/" + uniqueFileName;
-                        Console.WriteLine($"Profile picture path set to: {existingProfile.ProfilePicturePath}");
                     }
+                    else
+                    {
+                        TempData["Error"] = "Failed to save profile picture.";
+                        return View(profile);
+                    }
+                }
 
-                    // Save changes
-                    _context.Update(existingProfile);
-                    var result = await _context.SaveChangesAsync();
-                    Console.WriteLine($"SaveChanges result: {result} rows affected");
-                    
-                    TempData["Success"] = "Profile updated successfully!";
-                    return RedirectToAction(nameof(Index));
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error updating profile: {ex.Message}");
-                    Console.WriteLine($"Stack trace: {ex.StackTrace}");
-                    TempData["Error"] = $"An error occurred while updating your profile: {ex.Message}";
-                }
+                // Save changes
+                await _context.SaveChangesAsync();
+                
+                TempData["Success"] = "Profile updated successfully!";
+                return RedirectToAction(nameof(Index));
             }
-
-            return View(profile);
+            catch (Exception ex)
+            {
+                // Log the error for debugging
+                Console.WriteLine($"Error updating profile: {ex.Message}");
+                TempData["Error"] = $"An error occurred while updating your profile: {ex.Message}";
+                
+                // Return the view with the model to show validation errors
+                return View(profile);
+            }
         }
     }
 }
