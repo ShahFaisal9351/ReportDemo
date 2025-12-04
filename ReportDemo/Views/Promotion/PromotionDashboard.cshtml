@@ -1,0 +1,377 @@
+@model ReportDemo.ViewModels.Promotion.PromotionViewModel
+
+@{
+    ViewData["Title"] = "Student Promotion";
+    ViewData["ActivePage"] = "Promotion";
+}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Student Promotion</h4>
+                </div>
+                <div class="card-body">
+                    <form id="promotionForm" class="needs-validation" novalidate>
+                        <div class="row g-3">
+                            <!-- Current Academic Info -->
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header bg-light">
+                                        <h5 class="mb-0">Current Academic Information</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label asp-for="CurrentSessionId" class="form-label">Current Session</label>
+                                            <select asp-for="CurrentSessionId" asp-items="@(new SelectList(Model.AvailableSessions, "Id", "Name"))" 
+                                                    class="form-select select2" required>
+                                                <option value="">-- Select Session --</option>
+                                            </select>
+                                            <div class="invalid-feedback">Please select current session.</div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label asp-for="CurrentClassId" class="form-label">Current Class</label>
+                                            <select asp-for="CurrentClassId" asp-items="@(new SelectList(Model.AvailableClasses, "Id", "Name"))" 
+                                                    class="form-select select2" required>
+                                                <option value="">-- Select Class --</option>
+                                            </select>
+                                            <div class="invalid-feedback">Please select current class.</div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label asp-for="CurrentSectionId" class="form-label">Section (Optional)</label>
+                                            <select asp-for="CurrentSectionId" asp-items="@(new SelectList(Model.AvailableSections, "Id", "Name"))" 
+                                                    class="form-select select2">
+                                                <option value="">-- All Sections --</option>
+                                            </select>
+                                        </div>
+
+                                        <button type="button" id="loadStudentsBtn" class="btn btn-primary">
+                                            <i class="fas fa-search me-1"></i> Load Students
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Promotion Target -->
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header bg-light">
+                                        <h5 class="mb-0">Promotion Target</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label asp-for="NextSessionId" class="form-label">Next Session</label>
+                                            <select asp-for="NextSessionId" asp-items="@(new SelectList(Model.AvailableSessions, "Id", "Name"))" 
+                                                    class="form-select select2" required>
+                                                <option value="">-- Select Session --</option>
+                                            </select>
+                                            <div class="invalid-feedback">Please select next session.</div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label asp-for="NextClassId" class="form-label">Next Class</label>
+                                            <select asp-for="NextClassId" asp-items="@(new SelectList(Model.AvailableClasses, "Id", "Name"))" 
+                                                    class="form-select select2" required>
+                                                <option value="">-- Select Class --</option>
+                                            </select>
+                                            <div class="invalid-feedback">Please select next class.</div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label asp-for="NextSectionId" class="form-label">Section (Optional)</label>
+                                            <select asp-for="NextSectionId" asp-items="@(new SelectList(Model.AvailableSections, "Id", "Name"))" 
+                                                    class="form-select select2">
+                                                <option value="">-- Select Section --</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="form-check form-switch mb-3">
+                                            <input class="form-check-input" type="checkbox" id="generateNewRollNumbers" asp-for="GenerateNewRollNumbers" checked>
+                                            <label class="form-check-label" for="generateNewRollNumbers">Generate New Roll Numbers</label>
+                                        </div>
+
+                                        <div class="form-check form-switch mb-3">
+                                            <input class="form-check-input" type="checkbox" id="skipFailedStudents" asp-for="SkipFailedStudents" checked>
+                                            <label class="form-check-label" for="skipFailedStudents">Skip Failed Students</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                        <h5 class="mb-0">Students for Promotion</h5>
+                                        <div>
+                                            <button type="button" id="selectAllBtn" class="btn btn-sm btn-outline-primary me-2">
+                                                <i class="fas fa-check-double me-1"></i> Select All
+                                            </button>
+                                            <button type="button" id="deselectAllBtn" class="btn btn-sm btn-outline-secondary me-2">
+                                                <i class="fas fa-times me-1"></i> Deselect All
+                                            </button>
+                                            <button type="button" id="promoteSelectedBtn" class="btn btn-success" disabled>
+                                                <i class="fas fa-graduation-cap me-1"></i> Promote Selected Students
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="card-body" id="studentsContainer">
+                                        <div class="text-center text-muted py-5">
+                                            <i class="fas fa-user-graduate fa-3x mb-3"></i>
+                                            <p class="mb-0">Select current session, class, and section to load students</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Promotion History Modal -->
+<div class="modal fade" id="promotionHistoryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Promotion History</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="promotionHistoryContainer">
+                <!-- Content will be loaded via AJAX -->
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Loading promotion history...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link href="~/lib/select2/css/select2.min.css" rel="stylesheet" />
+    <link href="~/lib/select2-bootstrap-5-theme/select2-bootstrap-5.min.css" rel="stylesheet" />
+    <style>
+        .student-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid #0d6efd;
+        }
+        .student-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+        }
+        .student-card.failed {
+            border-left-color: #dc3545;
+            opacity: 0.8;
+        }
+        .student-card .form-check-input:disabled ~ .form-check-label,
+        .student-card.failed .form-check-label {
+            opacity: 0.7;
+        }
+        .badge-eligibility {
+            font-size: 0.75rem;
+            padding: 0.35em 0.65em;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script src="~/lib/select2/js/select2.full.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Initialize Select2
+            $('.select2').select2({
+                theme: 'bootstrap-5',
+                width: '100%',
+                placeholder: $(this).data('placeholder')
+            });
+
+            // Load students when form is submitted
+            $('#loadStudentsBtn').on('click', function() {
+                loadStudents();
+            });
+
+            // Handle select all/deselect all
+            $('#selectAllBtn').on('click', function() {
+                $('.student-checkbox:not(:disabled)').prop('checked', true);
+                updatePromoteButtonState();
+            });
+
+            $('#deselectAllBtn').on('click', function() {
+                $('.student-checkbox').prop('checked', false);
+                updatePromoteButtonState();
+            });
+
+            // Handle promote button click
+            $('#promoteSelectedBtn').on('click', function() {
+                if (confirm('Are you sure you want to promote the selected students? This action cannot be undone.')) {
+                    processPromotion();
+                }
+            });
+
+            // Show promotion history modal
+            $('#showHistoryBtn').on('click', function() {
+                loadPromotionHistory();
+                $('#promotionHistoryModal').modal('show');
+            });
+
+            // Function to load students based on filters
+            function loadStudents() {
+                const currentSessionId = $('#CurrentSessionId').val();
+                const currentClassId = $('#CurrentClassId').val();
+                const currentSectionId = $('#CurrentSectionId').val() || '';
+
+                if (!currentSessionId || !currentClassId) {
+                    showAlert('Please select both session and class to load students.', 'warning');
+                    return;
+                }
+
+                const $container = $('#studentsContainer');
+                $container.html(`
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Loading students...</p>
+                    </div>
+                `);
+
+                $.get(`/promotion/get-students?currentSessionId=${currentSessionId}&currentClassId=${currentClassId}${currentSectionId ? `&currentSectionId=${currentSectionId}` : ''}`)
+                    .done(function(response) {
+                        $container.html(response);
+                        updatePromoteButtonState();
+                    })
+                    .fail(function() {
+                        showAlert('Failed to load students. Please try again.', 'danger');
+                        $container.html(`
+                            <div class="text-center text-danger py-5">
+                                <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
+                                <p class="mb-0">Failed to load students. Please try again.</p>
+                            </div>
+                        `);
+                    });
+            }
+
+            // Function to process promotion
+            function processPromotion() {
+                const selectedStudents = [];
+                $('.student-checkbox:checked').each(function() {
+                    selectedStudents.push(parseInt($(this).val()));
+                });
+
+                if (selectedStudents.length === 0) {
+                    showAlert('Please select at least one student to promote.', 'warning');
+                    return;
+                }
+
+                const requestData = {
+                    currentSessionId: parseInt($('#CurrentSessionId').val()),
+                    currentClassId: parseInt($('#CurrentClassId').val()),
+                    currentSectionId: $('#CurrentSectionId').val() ? parseInt($('#CurrentSectionId').val()) : null,
+                    nextSessionId: parseInt($('#NextSessionId').val()),
+                    nextClassId: parseInt($('#NextClassId').val()),
+                    nextSectionId: $('#NextSectionId').val() ? parseInt($('#NextSectionId').val()) : null,
+                    studentIds: selectedStudents,
+                    promotionDate: new Date().toISOString().split('T')[0],
+                    generateNewRollNumbers: $('#generateNewRollNumbers').is(':checked'),
+                    notes: ''
+                };
+
+                const $button = $('#promoteSelectedBtn');
+                const originalText = $button.html();
+                $button.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...');
+
+                $.ajax({
+                    url: '/promotion/process',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(requestData),
+                    headers: {
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            showAlert(response.message, 'success');
+                            loadStudents(); // Refresh the student list
+                        } else {
+                            showAlert(response.message || 'Failed to process promotion.', 'danger');
+                        }
+                    },
+                    error: function(xhr) {
+                        let errorMessage = 'An error occurred while processing the promotion.';
+                        try {
+                            const response = JSON.parse(xhr.responseText);
+                            if (response && response.message) {
+                                errorMessage = response.message;
+                            }
+                        } catch (e) { /* Ignore parse error */ }
+                        showAlert(errorMessage, 'danger');
+                    },
+                    complete: function() {
+                        $button.prop('disabled', false).html(originalText);
+                    }
+                });
+            }
+
+            // Function to load promotion history
+            function loadPromotionHistory() {
+                const $container = $('#promotionHistoryContainer');
+                
+                $.get('/promotion/history')
+                    .done(function(response) {
+                        $container.html(response);
+                    })
+                    .fail(function() {
+                        $container.html(`
+                            <div class="alert alert-danger" role="alert">
+                                Failed to load promotion history. Please try again.
+                            </div>
+                        `);
+                    });
+            }
+
+            // Function to update promote button state based on selection
+            function updatePromoteButtonState() {
+                const hasSelectedStudents = $('.student-checkbox:checked').length > 0;
+                $('#promoteSelectedBtn').prop('disabled', !hasSelectedStudents);
+            }
+
+            // Show alert message
+            function showAlert(message, type) {
+                const alertHtml = `
+                    <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                        ${message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                `;
+                
+                // Remove any existing alerts
+                $('.alert-dismissible').alert('close');
+                
+                // Add new alert
+                $('.container-fluid').prepend(alertHtml);
+                
+                // Auto-dismiss after 5 seconds
+                setTimeout(() => {
+                    $('.alert-dismissible').alert('close');
+                }, 5000);
+            }
+
+            // Handle checkbox changes
+            $(document).on('change', '.student-checkbox', function() {
+                updatePromoteButtonState();
+            });
+        });
+    </script>
+}

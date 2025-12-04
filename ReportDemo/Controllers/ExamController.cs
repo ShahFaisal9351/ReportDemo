@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ReportDemo.Data;
 using ReportDemo.Models;
-using ReportDemo.Services;
+using ReportDemo.Services.Interfaces;
 
 namespace ReportDemo.Controllers
 {

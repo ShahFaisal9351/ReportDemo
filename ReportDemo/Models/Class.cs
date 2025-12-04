@@ -13,6 +13,10 @@ namespace ReportDemo.Models
         [Display(Name = "Class Name")]
         public string ClassName { get; set; } = string.Empty;
 
+        [Required(ErrorMessage = "Level is required")]
+        [Display(Name = "Class Level")]
+        public int Level { get; set; }
+
         [Required(ErrorMessage = "Section is required")]
         [StringLength(5, ErrorMessage = "Section cannot exceed 5 characters")]
         [RegularExpression(@"^[A-Z]$", ErrorMessage = "Section must be a single uppercase letter (A-Z)")]
@@ -44,5 +48,9 @@ namespace ReportDemo.Models
         [NotMapped]
         [Display(Name = "Student Count")]
         public int StudentCount => Students?.Count ?? 0;
+
+        [NotMapped]
+        [Display(Name = "Class Name")]
+        public string Name => ClassName;
     }
 }

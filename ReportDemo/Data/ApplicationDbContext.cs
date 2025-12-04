@@ -30,6 +30,12 @@ namespace ReportDemo.Data
         
         // ✅ User Profiles table
         public DbSet<UserProfile> UserProfiles { get; set; } = null!;
+        
+        // ✅ Sessions table
+        public DbSet<Session> Sessions { get; set; } = null!;
+        
+        // ✅ Sections table
+        public DbSet<Section> Sections { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -38,11 +44,69 @@ namespace ReportDemo.Data
             // Configure Class entity
             modelBuilder.Entity<Class>(entity =>
             {
-                // Ensure ClassName + Section combination is unique
-                entity.HasIndex(c => new { c.ClassName, c.Section })
-                    .IsUnique()
-                    .HasDatabaseName("IX_Classes_ClassName_Section");
+                // Configure timestamps to auto-update
+                entity.Property(c => c.CreatedAt)
+                    .HasDefaultValueSql("NOW()");
 
+                entity.Property(c => c.UpdatedAt)
+                    .HasDefaultValueSql("NOW()")
+                    .ValueGeneratedOnAddOrUpdate();
+            });
+
+            // Configure Session entity
+            modelBuilder.Entity<Session>(entity =>
+            {
+                entity.HasIndex(s => s.Name).IsUnique();
+                entity.HasIndex(s => s.AcademicYear);
+                entity.HasIndex(s => s.IsCurrent);
+            });
+
+            // Configure Section entity
+            modelBuilder.Entity<Section>(entity =>
+            {
+                entity.HasIndex(s => new { s.ClassId, s.Name }).IsUnique();
+                entity.HasOne(s => s.Class)
+                    .WithMany()
+                    .HasForeignKey(s => s.ClassId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // Configure Student entity
+            modelBuilder.Entity<Student>(entity =>
+            {
+                entity.HasOne(s => s.Section)
+                    .WithMany()
+                    .HasForeignKey(s => s.SectionId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(s => s.Class)
+                    .WithMany()
+                    .HasForeignKey(s => s.ClassId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // Configure PromotionHistory entity
+            modelBuilder.Entity<PromotionHistory>(entity =>
+            {
+                entity.HasOne(ph => ph.Student)
+                    .WithMany()
+                    .HasForeignKey(ph => ph.StudentId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(ph => ph.OldClass)
+                    .WithMany()
+                    .HasForeignKey(ph => ph.OldClassId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(ph => ph.NewClass)
+                    .WithMany()
+                    .HasForeignKey(ph => ph.NewClassId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // Configure Class entity
+            modelBuilder.Entity<Class>(entity =>
+            {
                 // Configure timestamps to auto-update
                 entity.Property(c => c.CreatedAt)
                     .HasDefaultValueSql("NOW()");

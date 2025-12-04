@@ -1,18 +1,11 @@
 using ReportDemo.Data;
 using ReportDemo.Models;
 using Microsoft.EntityFrameworkCore;
+using ReportDemo.Services.Interfaces;
+using ReportDemo.ViewModels.Promotion;
 
 namespace ReportDemo.Services
 {
-    public interface IPromotionService
-    {
-        Task<bool> CanPromoteClassAsync(int classId, string academicYear, string term);
-        Task<List<Student>> GetStudentsEligibleForPromotionAsync(int classId, string academicYear);
-        Task<PromotionResult> PromoteStudentsAsync(int classId, string academicYear, string promotedBy);
-        Task<Class?> GetNextClassAsync(int currentClassId);
-        Task<bool> IsMatricClassAsync(int classId);
-    }
-
     public class PromotionResult
     {
         public int TotalStudents { get; set; }
@@ -280,10 +273,48 @@ namespace ReportDemo.Services
         {
             return percentage switch
             {
-                >= 90 => "Honor",
-                >= 75 => "Merit",
-                _ => "Regular"
+                >= 80 => "First Class",
+                >= 60 => "Second Class",
+                >= 40 => "Third Class",
+                _ => "Pass"
             };
+        }
+
+        // New interface methods - throw NotImplementedException for now
+        public Task<PromotionViewModel> InitializePromotionViewModelAsync()
+        {
+            throw new NotImplementedException("This method is implemented in PromotionServiceV2");
+        }
+
+        public Task<PromotionViewModel> GetStudentsForPromotionAsync(int currentSessionId, int currentClassId, int? currentSectionId = null)
+        {
+            throw new NotImplementedException("This method is implemented in PromotionServiceV2");
+        }
+
+        public Task<(bool Success, string Message, List<PromotionHistory>? PromotedStudents)> ProcessPromotionAsync(PromotionRequestDto request)
+        {
+            throw new NotImplementedException("This method is implemented in PromotionServiceV2");
+        }
+
+        public Task<List<PromotionHistory>> GetPromotionHistoryAsync(int? studentId = null, int? classId = null, int? sessionId = null,
+            DateTime? fromDate = null, DateTime? toDate = null)
+        {
+            throw new NotImplementedException("This method is implemented in PromotionServiceV2");
+        }
+
+        public Task<bool> IsStudentEligibleForPromotionAsync(int studentId, int currentSessionId, int currentClassId)
+        {
+            throw new NotImplementedException("This method is implemented in PromotionServiceV2");
+        }
+
+        public Task<Class?> GetNextAvailableClassAsync(int currentClassId)
+        {
+            throw new NotImplementedException("This method is implemented in PromotionServiceV2");
+        }
+
+        public Task<string> GenerateNewRollNumberAsync(int nextClassId, int? nextSectionId = null)
+        {
+            throw new NotImplementedException("This method is implemented in PromotionServiceV2");
         }
     }
 }

@@ -1,326 +1,633 @@
 @model IEnumerable<ReportDemo.Models.Class>
 
 @{ 
-    ViewData["Title"] = "Class Management - School Management System";
+    ViewData["Title"] = "Class Management";
     Layout = "_DashboardLayout";
 }
 
 <style>
-    .card.shadow-sm { border: none; border-radius: 12px; }
-    .card-header { border-top-left-radius: 12px; border-top-right-radius: 12px; }
-    .input-group .form-control { box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
-    .table thead th { position: sticky; top: 0; z-index: 1; }
-    .table-hover tbody tr:hover { background-color: #f8fafc; }
-    .border-left-primary { border-left: .25rem solid #0d6efd; }
-    .border-left-success { border-left: .25rem solid #198754; }
-    .border-left-info { border-left: .25rem solid #0dcaf0; }
-    .border-left-warning { border-left: .25rem solid #ffc107; }
-    .card-title i { margin-right: .5rem; }
-    .btn-group .btn { border-radius: 8px !important; }
-    .badge { border-radius: .5rem; }
-    .stats-number { font-weight: 700; color: #212529; }
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        --info-gradient: linear-gradient(135deg, #373B44 0%, #4286f4 100%);
+        --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --card-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        --hover-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+    }
+
+    .main-header {
+        background: var(--primary-gradient);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--card-shadow);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .main-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 300px;
+        height: 300px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 50%;
+        animation: float 6s ease-in-out infinite;
+    }
+
+    @@keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+    }
+
+    .stats-card {
+        background: white;
+        border-radius: 20px;
+        padding: 1.5rem;
+        box-shadow: var(--card-shadow);
+        transition: var(--transition-smooth);
+        position: relative;
+        overflow: hidden;
+        border: none;
+    }
+
+    .stats-card:hover {
+        transform: translateY(-10px);
+        box-shadow: var(--hover-shadow);
+    }
+
+    .stats-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: var(--gradient);
+    }
+
+    .stats-card.primary::before { background: var(--primary-gradient); }
+    .stats-card.success::before { background: var(--success-gradient); }
+    .stats-card.info::before { background: var(--info-gradient); }
+    .stats-card.warning::before { background: var(--warning-gradient); }
+
+    .stats-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        color: white;
+    }
+
+    .stats-icon.primary { background: var(--primary-gradient); }
+    .stats-icon.success { background: var(--success-gradient); }
+    .stats-icon.info { background: var(--info-gradient); }
+    .stats-icon.warning { background: var(--warning-gradient); }
+
+    .stats-number {
+        font-size: 2rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+    }
+
+    .stats-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .search-container {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: var(--card-shadow);
+        margin-bottom: 2rem;
+    }
+
+    .search-input {
+        border: 2px solid #e9ecef;
+        border-radius: 15px;
+        padding: 1rem 1.5rem;
+        font-size: 1rem;
+        transition: var(--transition-smooth);
+        background: #f8f9fa;
+    }
+
+    .search-input:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        background: white;
+        transform: translateY(-2px);
+    }
+
+    .btn-modern {
+        border-radius: 15px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        border: none;
+        transition: var(--transition-smooth);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-modern::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: rgba(255,255,255,0.2);
+        transition: left 0.5s;
+    }
+
+    .btn-modern:hover::before {
+        left: 100%;
+    }
+
+    .btn-primary-modern {
+        background: var(--primary-gradient);
+        color: white;
+    }
+
+    .btn-primary-modern:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+    }
+
+    .table-modern {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: var(--card-shadow);
+    }
+
+    .table-modern thead {
+        background: var(--primary-gradient);
+        color: white;
+    }
+
+    .table-modern thead th {
+        border: none;
+        padding: 1.5rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.85rem;
+    }
+
+    .table-modern tbody tr {
+        transition: var(--transition-smooth);
+        border-bottom: 1px solid #f1f3f5;
+    }
+
+    .table-modern tbody tr:hover {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        transform: scale(1.02);
+    }
+
+    .table-modern tbody td {
+        padding: 1.5rem;
+        vertical-align: middle;
+        border: none;
+    }
+
+    .class-name-cell {
+        font-weight: 700;
+        color: #495057;
+        font-size: 1.1rem;
+    }
+
+    .badge-modern {
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-action {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        transition: var(--transition-smooth);
+        position: relative;
+    }
+
+    .btn-action:hover {
+        transform: translateY(-3px) scale(1.1);
+    }
+
+    .btn-action.info:hover { background: #373B44; color: white; }
+    .btn-action.warning:hover { background: #f093fb; color: white; }
+    .btn-action.success:hover { background: #11998e; color: white; }
+    .btn-action.secondary:hover { background: #6c757d; color: white; }
+    .btn-action.danger:hover { background: #f5576c; color: white; }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: white;
+        border-radius: 20px;
+        box-shadow: var(--card-shadow);
+    }
+
+    .empty-state-icon {
+        font-size: 5rem;
+        color: #dee2e6;
+        margin-bottom: 2rem;
+        animation: pulse 2s infinite;
+    }
+
+    @@keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+
+    .loading-spinner {
+        display: none;
+        text-align: center;
+        padding: 2rem;
+    }
+
+    .spinner-modern {
+        width: 50px;
+        height: 50px;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @@keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1050;
+    }
+
+    .toast-modern {
+        background: white;
+        border-radius: 15px;
+        padding: 1rem 1.5rem;
+        box-shadow: var(--card-shadow);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        animation: slideIn 0.3s ease-out;
+    }
+
+    @@keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    .fade-out {
+        animation: fadeOut 0.3s ease-out forwards;
+    }
+
+    @@keyframes fadeOut {
+        to {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .main-header { padding: 1.5rem; }
+        .stats-card { margin-bottom: 1rem; }
+        .table-modern { font-size: 0.9rem; }
+        .action-buttons { flex-wrap: wrap; }
+        .btn-action { width: 35px; height: 35px; }
+    }
 </style>
 
 <div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h3 class="card-title mb-0">
-                            <i class="fas fa-chalkboard-teacher"></i>
-                            Classes Management
-                        </h3>
-                        <div class="d-flex gap-2">
-                            <a asp-action="ManageClasses" class="btn btn-outline-light btn-sm">
-                                <i class="fas fa-th-large"></i> Card View
-                            </a>
-                            <a asp-action="Create" class="btn btn-light btn-sm">
-                                <i class="fas fa-plus"></i> Add New Class
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <!-- Search and Filter Section -->
-                    <div class="row mb-3">
-                        <div class="col-md-8">
-                            <form asp-action="Index" method="get">
-                                <div class="input-group">
-                                    <input type="text" name="SearchString" value="@ViewBag.CurrentFilter" 
-                                           placeholder="Search classes, teachers, or rooms..." class="form-control shadow-sm">
-                                    <input type="hidden" name="sortOrder" value="@ViewBag.CurrentSort" />
-                                    <button class="btn btn-outline-primary shadow-sm" type="submit">
-                                        <i class="fas fa-search"></i> Search
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                        <div class="col-md-4 text-end">
-                            @if (!string.IsNullOrEmpty(ViewBag.CurrentFilter as string))
-                            {
-                                <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
-                                    <i class="fas fa-times"></i> Clear Filter
-                                </a>
-                            }
-                        </div>
-                    </div>
-
-                    <!-- Statistics Cards -->
-                    <div class="row mb-4">
-                        <div class="col-md-3">
-                            <div class="card border-left-primary shadow">
-                                <div class="card-body">
-                                    <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
-                                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                                Total Classes
-                                            </div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                                @Model.Count()
-                                            </div>
-                                        </div>
-                                        <div class="col-auto">
-                                            <i class="fas fa-chalkboard-teacher fa-2x text-gray-300"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card border-left-success shadow">
-                                <div class="card-body">
-                                    <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
-                                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                                Total Students
-                                            </div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                                @Model.Sum(c => c.Students.Count)
-                                            </div>
-                                        </div>
-                                        <div class="col-auto">
-                                            <i class="fas fa-users fa-2x text-gray-300"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card border-left-info shadow">
-                                <div class="card-body">
-                                    <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
-                                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                                                Avg Students/Class
-                                            </div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                                @(Model.Any() ? Math.Round(Model.Average(c => c.Students.Count), 1) : 0)
-                                            </div>
-                                        </div>
-                                        <div class="col-auto">
-                                            <i class="fas fa-chart-bar fa-2x text-gray-300"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card border-left-warning shadow">
-                                <div class="card-body">
-                                    <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
-                                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                                With Teachers
-                                            </div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                                @Model.Count(c => !string.IsNullOrEmpty(c.TeacherInCharge))
-                                            </div>
-                                        </div>
-                                        <div class="col-auto">
-                                            <i class="fas fa-user-tie fa-2x text-gray-300"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    @if (Model.Any())
-                    {
-                        <div class="table-responsive">
-                            <table class="table table-hover table-striped align-middle">
-                                <thead class="table-dark">
-                                    <tr>
-                                        <th>
-                                            <a asp-action="Index" asp-route-sortOrder="@ViewBag.ClassNameSortParm" 
-                                               asp-route-searchString="@ViewBag.CurrentFilter" 
-                                               class="text-white text-decoration-none">
-                                                Class Name <i class="fas fa-sort"></i>
-                                            </a>
-                                        </th>
-                                        <th>
-                                            <a asp-action="Index" asp-route-sortOrder="@ViewBag.SectionSortParm" 
-                                               asp-route-searchString="@ViewBag.CurrentFilter"
-                                               class="text-white text-decoration-none">
-                                                Section <i class="fas fa-sort"></i>
-                                            </a>
-                                        </th>
-                                        <th>
-                                            <a asp-action="Index" asp-route-sortOrder="@ViewBag.TeacherSortParm" 
-                                               asp-route-searchString="@ViewBag.CurrentFilter"
-                                               class="text-white text-decoration-none">
-                                                Teacher In Charge <i class="fas fa-sort"></i>
-                                            </a>
-                                        </th>
-                                        <th>Room Number</th>
-                                        <th>Students</th>
-                                        <th>Created</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var item in Model)
-                                    {
-                                        <tr>
-                                            <td>
-                                                <strong class="text-primary">@Html.DisplayFor(modelItem => item.ClassName)</strong>
-                                            </td>
-                                            <td>
-                                                <span class="badge bg-secondary">@Html.DisplayFor(modelItem => item.Section)</span>
-                                            </td>
-                                            <td>
-                                                @if (!string.IsNullOrEmpty(item.TeacherInCharge))
-                                                {
-                                                    <i class="fas fa-user-tie text-muted"></i>
-                                                    @Html.DisplayFor(modelItem => item.TeacherInCharge)
-                                                }
-                                                else
-                                                {
-                                                    <em class="text-muted">Not assigned</em>
-                                                }
-                                            </td>
-                                            <td>
-                                                @if (!string.IsNullOrEmpty(item.RoomNumber))
-                                                {
-                                                    <i class="fas fa-door-open text-muted"></i>
-                                                    @Html.DisplayFor(modelItem => item.RoomNumber)
-                                                }
-                                                else
-                                                {
-                                                    <em class="text-muted">Not set</em>
-                                                }
-                                            </td>
-                                            <td>
-                                                @if (item.Students.Count > 0)
-                                                {
-                                                    <a asp-action="Students" asp-route-id="@item.Id" 
-                                                       class="btn btn-sm btn-outline-info" title="View Students">
-                                                        <i class="fas fa-users"></i> @item.Students.Count
-                                                    </a>
-                                                }
-                                                else
-                                                {
-                                                    <span class="badge bg-light text-dark">0</span>
-                                                }
-                                            </td>
-                                            <td>
-                                                <small class="text-muted">@item.CreatedAt.ToString("MMM dd, yyyy")</small>
-                                            </td>
-                                            <td>
-                                                <div class="btn-group" role="group">
-                                                    <a asp-action="Details" asp-route-id="@item.Id" 
-                                                       class="btn btn-sm btn-outline-info" title="View Details">
-                                                        <i class="fas fa-eye"></i>
-                                                    </a>
-                                                    <a asp-controller="Exam" asp-action="ClassExamStatus" asp-route-classId="@item.Id"
-                                                       class="btn btn-sm btn-outline-warning" title="Exam Status">
-                                                        <i class="fas fa-clipboard-check"></i>
-                                                    </a>
-                                                    <button type="button" class="btn btn-sm btn-outline-success" 
-                                                            onclick="checkPromotionStatus(@item.Id)" 
-                                                            title="Promote Students">
-                                                        <i class="fas fa-graduation-cap"></i>
-                                                    </button>
-                                                    <a asp-action="Edit" asp-route-id="@item.Id" 
-                                                       class="btn btn-sm btn-outline-secondary" title="Edit">
-                                                        <i class="fas fa-edit"></i>
-                                                    </a>
-                                                    <a asp-action="Delete" asp-route-id="@item.Id" 
-                                                       class="btn btn-sm btn-outline-danger" title="Delete">
-                                                        <i class="fas fa-trash"></i>
-                                                    </a>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    }
-                    else
-                    {
-                        <!-- Empty State -->
-                        <div class="text-center py-5">
-                            <div class="mb-4">
-                                <i class="fas fa-chalkboard-teacher fa-5x text-muted"></i>
-                            </div>
-                            <h4 class="text-muted">No Classes Found</h4>
-                            <p class="text-muted">
-                                @if (!string.IsNullOrEmpty(ViewBag.CurrentFilter as string))
-                                {
-                                    <span>No classes match your search criteria.</span>
-                                }
-                                else
-                                {
-                                    <span>Start by creating your first class.</span>
-                                }
-                            </p>
-                            <a asp-action="Create" class="btn btn-primary">
-                                <i class="fas fa-plus"></i> Create First Class
-                            </a>
-                        </div>
-                    }
+    <!-- Modern Header -->
+    <div class="main-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="text-white mb-3">
+                    <i class="fas fa-graduation-cap me-3"></i>Class Management
+                </h1>
+                <p class="text-white-50 mb-0">Manage and organize your educational classes efficiently</p>
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <div class="d-flex gap-2 justify-content-md-end">
+                    <a asp-action="ManageClasses" class="btn btn-modern btn-light">
+                        <i class="fas fa-th-large me-2"></i>Card View
+                    </a>
+                    <a asp-action="Create" class="btn btn-modern btn-primary-modern">
+                        <i class="fas fa-plus me-2"></i>Add Class
+                    </a>
                 </div>
             </div>
         </div>
     </div>
+                <!-- Modern Search Section -->
+    <div class="search-container">
+        <form asp-action="Index" method="get">
+            <div class="row align-items-center">
+                <div class="col-md-10">
+                    <div class="position-relative">
+                        <i class="fas fa-search position-absolute" style="left: 20px; top: 50%; transform: translateY(-50%); color: #6c757d;"></i>
+                        <input type="text" name="SearchString" value="@ViewBag.CurrentFilter" 
+                               placeholder="Search classes, teachers, or rooms..." 
+                               class="search-input ps-5 w-100">
+                        <input type="hidden" name="sortOrder" value="@ViewBag.CurrentSort" />
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-modern btn-primary-modern w-100">
+                        <i class="fas fa-search me-2"></i>Search
+                    </button>
+                </div>
+            </div>
+            @if (!string.IsNullOrEmpty(ViewBag.CurrentFilter as string))
+            {
+                <div class="mt-3">
+                    <a asp-action="Index" class="btn btn-modern btn-light">
+                        <i class="fas fa-times me-2"></i>Clear Filter
+                    </a>
+                </div>
+            }
+        </form>
+    </div>
+
+    <!-- Modern Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="stats-card primary">
+                <div class="stats-icon primary">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                </div>
+                <div class="stats-number">@Model.Count()</div>
+                <div class="stats-label">Total Classes</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stats-card success">
+                <div class="stats-icon success">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stats-number">@Model.Sum(c => c.Students.Count)</div>
+                <div class="stats-label">Total Students</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stats-card info">
+                <div class="stats-icon info">
+                    <i class="fas fa-chart-bar"></i>
+                </div>
+                <div class="stats-number">@(Model.Any() ? Math.Round(Model.Average(c => c.Students.Count), 1) : 0)</div>
+                <div class="stats-label">Avg Students/Class</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stats-card warning">
+                <div class="stats-icon warning">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+                <div class="stats-number">@Model.Count(c => !string.IsNullOrEmpty(c.TeacherInCharge))</div>
+                <div class="stats-label">With Teachers</div>
+            </div>
+        </div>
+    </div>
+
+                    @if (Model.Any())
+    {
+        <div class="table-modern">
+            <table class="table table-modern mb-0">
+                <thead>
+                    <tr>
+                        <th>
+                            <a asp-action="Index" asp-route-sortOrder="@ViewBag.ClassNameSortParm" 
+                               asp-route-searchString="@ViewBag.CurrentFilter" 
+                               class="text-white text-decoration-none d-flex align-items-center">
+                                Class Name <i class="fas fa-sort ms-2"></i>
+                            </a>
+                        </th>
+                        <th>
+                            <a asp-action="Index" asp-route-sortOrder="@ViewBag.SectionSortParm" 
+                               asp-route-searchString="@ViewBag.CurrentFilter"
+                               class="text-white text-decoration-none d-flex align-items-center">
+                                Section <i class="fas fa-sort ms-2"></i>
+                            </a>
+                        </th>
+                        <th>
+                            <a asp-action="Index" asp-route-sortOrder="@ViewBag.TeacherSortParm" 
+                               asp-route-searchString="@ViewBag.CurrentFilter"
+                               class="text-white text-decoration-none d-flex align-items-center">
+                                Teacher <i class="fas fa-sort ms-2"></i>
+                            </a>
+                        </th>
+                        <th>Room</th>
+                        <th>Students</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="class-name-cell">
+                                @Html.DisplayFor(modelItem => item.ClassName)
+                            </td>
+                            <td>
+                                <span class="badge-modern bg-info text-white">@Html.DisplayFor(modelItem => item.Section)</span>
+                            </td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(item.TeacherInCharge))
+                                {
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-user-tie text-muted me-2"></i>
+                                        @Html.DisplayFor(modelItem => item.TeacherInCharge)
+                                    </div>
+                                }
+                                else
+                                {
+                                    <em class="text-muted">Not assigned</em>
+                                }
+                            </td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(item.RoomNumber))
+                                {
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-door-open text-muted me-2"></i>
+                                        @Html.DisplayFor(modelItem => item.RoomNumber)
+                                    </div>
+                                }
+                                else
+                                {
+                                    <em class="text-muted">Not set</em>
+                                }
+                            </td>
+                            <td>
+                                @if (item.Students.Count > 0)
+                                {
+                                    <a asp-action="Students" asp-route-id="@item.Id" 
+                                       class="btn btn-modern btn-sm btn-primary-modern text-decoration-none">
+                                        <i class="fas fa-users me-1"></i> @item.Students.Count
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span class="badge-modern bg-secondary">0</span>
+                                }
+                            </td>
+                            <td>
+                                <small class="text-muted">@item.CreatedAt.ToString("MMM dd, yyyy")</small>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <a asp-action="Details" asp-route-id="@item.Id" 
+                                       class="btn-action info text-decoration-none" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a asp-controller="Exam" asp-action="ClassExamStatus" asp-route-classId="@item.Id"
+                                       class="btn-action warning text-decoration-none" title="Exam Status">
+                                        <i class="fas fa-clipboard-check"></i>
+                                    </a>
+                                    <button type="button" class="btn-action success text-decoration-none" 
+                                            onclick="checkPromotionStatus(@item.Id)" 
+                                            title="Promote Students">
+                                        <i class="fas fa-graduation-cap"></i>
+                                    </button>
+                                    <a asp-action="Edit" asp-route-id="@item.Id" 
+                                       class="btn-action secondary text-decoration-none" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.Id" 
+                                       class="btn-action danger text-decoration-none" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+                    else
+    {
+        <!-- Modern Empty State -->
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <i class="fas fa-chalkboard-teacher"></i>
+            </div>
+            <h3 class="text-muted mb-3">No Classes Found</h3>
+            <p class="text-muted mb-4">
+                @if (!string.IsNullOrEmpty(ViewBag.CurrentFilter as string))
+                {
+                    <span>No classes match your search criteria. Try adjusting your filters.</span>
+                }
+                else
+                {
+                    <span>Start by creating your first class to begin managing your educational institution.</span>
+                }
+            </p>
+            <a asp-action="Create" class="btn btn-modern btn-primary-modern">
+                <i class="fas fa-plus me-2"></i>Create First Class
+            </a>
+        </div>
+    }
 </div>
 
-<!-- Alert Messages -->
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success alert-dismissible fade show position-fixed" style="top: 20px; right: 20px; z-index: 1050;" role="alert">
-        <i class="fas fa-check-circle"></i>
-        @TempData["SuccessMessage"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-}
-
-@if (TempData["ErrorMessage"] != null)
-{
-    <div class="alert alert-danger alert-dismissible fade show position-fixed" style="top: 20px; right: 20px; z-index: 1050;" role="alert">
-        <i class="fas fa-exclamation-circle"></i>
-        @TempData["ErrorMessage"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-}
+<!-- Modern Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
 
 @section Scripts {
     <script>
-        // Auto hide alerts after 5 seconds
-        setTimeout(function() {
-            $('.alert').fadeOut('slow');
-        }, 5000);
+        // Modern Toast Notifications
+        function showToast(message, type = 'info') {
+            const toastContainer = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'toast-modern';
+            
+            const icons = {
+                success: 'fa-check-circle text-success',
+                error: 'fa-exclamation-circle text-danger',
+                warning: 'fa-exclamation-triangle text-warning',
+                info: 'fa-info-circle text-info'
+            };
+            
+            toast.innerHTML = `
+                <i class="fas ${icons[type] || icons.info}"></i>
+                <div class="flex-grow-1">${message}</div>
+                <button type="button" class="btn-close" onclick="removeToast(this)"></button>
+            `;
+            
+            toastContainer.appendChild(toast);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                toast.classList.add('fade-out');
+                setTimeout(() => toast.remove(), 300);
+            }, 5000);
+        }
         
+        function removeToast(button) {
+            const toast = button.closest('.toast-modern');
+            toast.classList.add('fade-out');
+            setTimeout(() => toast.remove(), 300);
+        }
+        
+        // Check Promotion Status with Modern Loading
         function checkPromotionStatus(classId) {
-            // Check if exams are complete, then redirect to detailed promotion view
+            showToast('Checking promotion eligibility...', 'info');
+            
             fetch(`/Classes/PromotionStatus/${classId}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.canPromote) {
-                        // Redirect to the detailed promotion page
-                        window.location.href = `/Classes/BulkPromote/${classId}`;
+                        showToast('Redirecting to promotion page...', 'success');
+                        setTimeout(() => {
+                            window.location.href = `/Classes/BulkPromote/${classId}`;
+                        }, 1000);
                     } else {
                         const message = data.message || 'Cannot promote this class yet. Please ensure all students have completed their exams.';
                         showToast(message, 'warning');
@@ -328,31 +635,46 @@
                 })
                 .catch(error => {
                     console.error('Error checking promotion status:', error);
-                    // If API fails, redirect to exam status page where they can see details
-                    window.location.href = `/Exam/ClassExamStatus?classId=${classId}`;
+                    showToast('Redirecting to exam status page...', 'info');
+                    setTimeout(() => {
+                        window.location.href = `/Exam/ClassExamStatus?classId=${classId}`;
+                    }, 1000);
                 });
         }
         
-        function showToast(message, type = 'info') {
-            // Simple toast notification using Bootstrap alerts
-            const alertClass = type === 'error' ? 'danger' : type === 'warning' ? 'warning' : 'success';
-            const iconClass = type === 'error' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : 'check-circle';
+        // Show TempData messages as toasts
+        document.addEventListener('DOMContentLoaded', function() {
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <text>showToast('@TempData["SuccessMessage"]', 'success');</text>
+            }
             
-            const toast = $(`
-                <div class="alert alert-${alertClass} alert-dismissible fade show position-fixed" 
-                     style="top: 20px; right: 20px; z-index: 1060; min-width: 300px;" role="alert">
-                    <i class="fas fa-${iconClass}"></i>
-                    ${message}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            `);
-            
-            $('body').append(toast);
-            
-            // Auto hide after 5 seconds
-            setTimeout(() => {
-                toast.fadeOut('slow', () => toast.remove());
-            }, 5000);
-        }
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <text>showToast('@TempData["ErrorMessage"]', 'error');</text>
+            }
+        });
+        
+        // Add smooth scroll behavior
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+        
+        // Add loading states for forms
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', function() {
+                const submitBtn = form.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+                }
+            });
+        });
     </script>
 }

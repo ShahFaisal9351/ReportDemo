@@ -3,79 +3,138 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ReportDemo.Data;
 using ReportDemo.Models;
-using ReportDemo.Services;
+using ReportDemo.Services.Interfaces;  // This is the correct namespace for IPromotionService
+using ReportDemo.ViewModels.Promotion;
 using System.Text;
+using Microsoft.Extensions.Logging;
 
 namespace ReportDemo.Controllers
 {
-    [Authorize]
+    // [Authorize(Roles = "Admin,Teacher")] // Temporarily commented out for testing
+    [Route("promotion")]
     public class PromotionController : Controller
     {
         private readonly ApplicationDbContext _context;
         private readonly IPromotionService _promotionService;
+        private readonly ILogger<PromotionController> _logger;
 
-        public PromotionController(ApplicationDbContext context, IPromotionService promotionService)
+        public PromotionController(
+            ApplicationDbContext context, 
+            IPromotionService promotionService,
+            ILogger<PromotionController> logger)
         {
-            _context = context;
-            _promotionService = promotionService;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _promotionService = promotionService ?? throw new ArgumentNullException(nameof(promotionService));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task<IActionResult> Dashboard(int? classId, string? academicYear)
+        [HttpGet("")]
+        [HttpGet("index")]
+        [HttpGet("dashboard")]
+        public async Task<IActionResult> Index()
         {
-            var classes = await _context.Classes
-                .OrderBy(c => c.ClassName)
-                .ThenBy(c => c.Section)
-                .ToListAsync();
-
-            ViewBag.Classes = classes;
-            ViewBag.CurrentAcademicYear = academicYear ?? GetCurrentAcademicYear();
-            ViewBag.SelectedClassId = classId;
-
-            List<StudentEligibilityVM> students = new();
-            if (classId.HasValue)
+            try
             {
-                var selectedClass = await _context.Classes
-                    .Include(c => c.Students)
-                    .FirstOrDefaultAsync(c => c.Id == classId.Value);
-                if (selectedClass != null)
-                {
-                    ViewBag.Class = selectedClass;
-                    var ay = ViewBag.CurrentAcademicYear as string;
-                    var results = await _context.ExamResults
-                        .Where(e => e.ClassId == classId.Value && e.AcademicYear == ay && e.Term == "Final")
-                        .ToListAsync();
+                var viewModel = await _promotionService.InitializePromotionViewModelAsync();
+                return View("PromotionDashboard", viewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error initializing promotion dashboard");
+                TempData["ErrorMessage"] = "An error occurred while initializing the promotion dashboard.";
+                return RedirectToAction("Index", "Home");
+            }
+        }
 
-                    foreach (var s in selectedClass.Students.OrderBy(s => s.RollNumber))
-                    {
-                        var r = results.Where(e => e.StudentId == s.Id)
-                                       .OrderByDescending(e => e.ExamDate)
-                                       .FirstOrDefault();
-                        var status = ComputeEligibility(r);
-                        students.Add(new StudentEligibilityVM
-                        {
-                            Student = s,
-                            Result = r,
-                            Eligibility = status
-                        });
-                    }
+        [HttpGet("get-students")]
+        public async Task<IActionResult> GetStudentsForPromotion(int currentSessionId, int currentClassId, int? currentSectionId = null)
+        {
+            try
+            {
+                var viewModel = await _promotionService.GetStudentsForPromotionAsync(
+                    currentSessionId, currentClassId, currentSectionId);
+                
+                return PartialView("_StudentPromotionList", viewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting students for promotion");
+                return BadRequest(new { success = false, message = "Error loading students. Please try again." });
+            }
+        }
 
-                    var canPromote = await _promotionService.CanPromoteClassAsync(classId.Value, ay!, "Final");
-                    ViewBag.CanPromote = canPromote;
-                    ViewBag.NextClass = await _promotionService.GetNextClassAsync(classId.Value);
-                }
+        [HttpPost("process")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ProcessPromotion([FromBody] PromotionRequestDto request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new { success = false, message = "Invalid request data" });
             }
 
-            return View(students);
+            try
+            {
+                var result = await _promotionService.ProcessPromotionAsync(request);
+                
+                if (result.Success)
+                {
+                    _logger.LogInformation($"Successfully promoted {result.PromotedStudents?.Count ?? 0} students");
+                    return Json(new { 
+                        success = true, 
+                        message = $"Successfully promoted {result.PromotedStudents?.Count ?? 0} students.",
+                        data = new { promotedCount = result.PromotedStudents?.Count ?? 0 }
+                    });
+                }
+                
+                return BadRequest(new { success = false, message = result.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error processing promotion");
+                return StatusCode(500, new { 
+                    success = false, 
+                    message = "An error occurred while processing the promotion. Please try again." 
+                });
+            }
         }
 
-        [HttpGet]
-        public async Task<IActionResult> Preview(int classId, string academicYear)
+        [HttpGet("history")]
+        public async Task<IActionResult> GetPromotionHistory(
+            int? studentId = null, 
+            int? classId = null, 
+            int? sessionId = null,
+            DateTime? fromDate = null, 
+            DateTime? toDate = null)
         {
-            var canPromote = await _promotionService.CanPromoteClassAsync(classId, academicYear, "Final");
-            var nextClass = await _promotionService.GetNextClassAsync(classId);
-            var isMatric = await _promotionService.IsMatricClassAsync(classId);
+            try
+            {
+                var history = await _promotionService.GetPromotionHistoryAsync(
+                    studentId, classId, sessionId, fromDate, toDate);
+                
+                return PartialView("_PromotionHistoryList", history);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving promotion history");
+                return BadRequest(new { success = false, message = "Error loading promotion history." });
+            }
+        }
 
-            return Json(new { canPromote, nextClass = nextClass?.DisplayName, isMatric });
+        [HttpGet("check-eligibility/{studentId}")]
+        public async Task<IActionResult> CheckEligibility(int studentId, int currentSessionId, int currentClassId)
+        {
+            try
+            {
+                var isEligible = await _promotionService.IsStudentEligibleForPromotionAsync(
+                    studentId, currentSessionId, currentClassId);
+                
+                return Json(new { success = true, isEligible });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error checking eligibility for student {studentId}");
+                return Json(new { success = false, message = "Error checking eligibility." });
+            }
         }
 
         [HttpGet]
@@ -111,7 +170,7 @@ namespace ReportDemo.Controllers
             var result = await _promotionService.PromoteStudentsAsync(classId, academicYear, promotedBy);
 
             TempData[result.Success ? "SuccessMessage" : "ErrorMessage"] = string.Join(" ", result.Messages);
-            return RedirectToAction(nameof(Dashboard), new { classId, academicYear });
+            return RedirectToAction(nameof(Index));
         }
 
         private static string Escape(string? input) => string.IsNullOrWhiteSpace(input) ? "" : input.Replace(",", " ");

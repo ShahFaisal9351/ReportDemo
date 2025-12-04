@@ -29,6 +29,18 @@ namespace ReportDemo.Models
         [ForeignKey("NewClassId")]
         public virtual Class? NewClass { get; set; }
 
+        // Session Information
+        [Required]
+        public int OldSessionId { get; set; }
+
+        [ForeignKey("OldSessionId")]
+        public virtual Session OldSession { get; set; } = null!;
+
+        public int? NewSessionId { get; set; }
+
+        [ForeignKey("NewSessionId")]
+        public virtual Session? NewSession { get; set; }
+
         // Promotion Details
         [Required(ErrorMessage = "Promotion date is required")]
         [DataType(DataType.Date)]
@@ -48,6 +60,10 @@ namespace ReportDemo.Models
         [StringLength(100, ErrorMessage = "Promoted by cannot exceed 100 characters")]
         [Display(Name = "Promoted By")]
         public string? PromotedBy { get; set; }
+
+        [StringLength(500, ErrorMessage = "Notes cannot exceed 500 characters")]
+        [Display(Name = "Notes")]
+        public string? Notes { get; set; }
 
         // Performance Data
         [Range(0, 100, ErrorMessage = "Final percentage must be between 0 and 100")]

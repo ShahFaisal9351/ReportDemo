@@ -22,6 +22,13 @@ namespace ReportDemo.Models
         [ForeignKey("ClassId")]
         public virtual Class Class { get; set; } = null!;
 
+        // Session Information
+        [Required(ErrorMessage = "Session is required")]
+        public int SessionId { get; set; }
+
+        [ForeignKey("SessionId")]
+        public virtual Session Session { get; set; } = null!;
+
         // Exam Details
         [Required(ErrorMessage = "Term is required")]
         [StringLength(50, ErrorMessage = "Term cannot exceed 50 characters")]

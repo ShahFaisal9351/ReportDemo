@@ -39,18 +39,33 @@ namespace ReportDemo.Models
         [Display(Name = "Admission Number")]
         public string AdmissionNumber { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Section is required")]
-        [StringLength(5, ErrorMessage = "Section cannot exceed 5 characters")]
-        [RegularExpression(@"^[A-Z]$", ErrorMessage = "Section must be a single uppercase letter (A-Z)")]
-        public string Section { get; set; } = string.Empty;
+        [Display(Name = "Is Active")]
+        public bool IsActive { get; set; } = true;
 
         // Foreign key for Class relationship
         [Required(ErrorMessage = "Class is required")]
         [Display(Name = "Class")]
         public int ClassId { get; set; }
 
-        // Navigation property
+        // Navigation property for Class
+        [ForeignKey("ClassId")]
         public virtual Class? Class { get; set; }
+
+        // Foreign key for Section relationship
+        [Display(Name = "Section")]
+        public int? SectionId { get; set; }
+
+        // Navigation property for Section
+        [ForeignKey("SectionId")]
+        public virtual Section? Section { get; set; }
+
+        // Foreign key for Session relationship
+        [Display(Name = "Session")]
+        public int? SessionId { get; set; }
+
+        // Navigation property for Session
+        [ForeignKey("SessionId")]
+        public virtual Session? Session { get; set; }
 
         [StringLength(50, ErrorMessage = "Major subject cannot exceed 50 characters")]
         [Display(Name = "Major Subject")]
@@ -62,7 +77,6 @@ namespace ReportDemo.Models
         public DateTime EnrollmentDate { get; set; }
 
         // Contact Information
-        [Required(ErrorMessage = "Email is required")]
         [EmailAddress(ErrorMessage = "Invalid email format")]
         [StringLength(100, ErrorMessage = "Email cannot exceed 100 characters")]
         public string Email { get; set; } = string.Empty;
